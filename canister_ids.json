@@ -4,5 +4,11 @@
   },
   "protocol": {
     "ic": "difs6-zyaaa-aaaal-aarrq-cai"
+  },
+  "mint_token": {
+    "ic": "jkekj-dqaaa-aaaao-aaf6a-cai"
+  },
+  "fake_btc": {
+    "ic": "6ztww-vaaaa-aaaam-qanba-cai"
   }
 }
