@@ -16,6 +16,14 @@
     "protocol": {
       "main": "src/protocol/main.mo",
       "type": "motoko"
+    },
+    "fake_btc" : {
+      "main": "src/fake_btc/token.mo",
+      "type": "motoko"
+    },
+    "mint_token": {
+      "main": "src/mint_token/token.mo",
+      "type": "motoko"
     }
   },
   "defaults": {
