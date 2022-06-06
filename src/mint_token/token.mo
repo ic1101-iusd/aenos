@@ -28,7 +28,6 @@ shared(msg) actor class UsbToken(
     _symbol: Text,
     _decimals: Nat8,
     _totalSupply: Nat,
-    _owner: Principal,
     _fee: Nat
     ) = this {
     type Operation = Types.Operation;
@@ -59,7 +58,7 @@ shared(msg) actor class UsbToken(
         };
     };
 
-    private stable var owner_ : Principal = _owner;
+    private stable var owner_ : Principal = msg.caller;
     private stable var logo_ : Text = _logo;
     private stable var name_ : Text = _name;
     private stable var decimals_ : Nat8 = _decimals;
