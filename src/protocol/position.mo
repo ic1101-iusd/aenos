@@ -1,13 +1,14 @@
 import Nat "mo:base/Nat";
 import Float "mo:base/Float";
 import Principal "mo:base/Principal";
-
 module {
-    class Position(idInit: Nat, ownerInit: Principal, collateralAmountInit: Nat, stableAmountInit: Nat) {
+    public class Position(idInit: Nat, ownerInit: Principal, collateralAmountInit: Nat, stableAmountInit: Nat) {
         let id = idInit;
+        let owner = ownerInit;
         var collateralAmount = collateralAmountInit;
         var stableAmount = stableAmountInit;
-        let owner = ownerInit;
+        var deleted = false;
+        
 
         public func setCollateral(newAmount: Nat) {
             collateralAmount := newAmount;
@@ -15,6 +16,10 @@ module {
 
         public func setStableMinted(newAmount: Nat) {
             stableAmount := newAmount;
+        };
+
+        public func delete() {
+            deleted := true;
         };
 
         public func getRatio() : Float {
@@ -27,4 +32,5 @@ module {
             0
         };
     };
+
 }
