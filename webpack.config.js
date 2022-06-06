@@ -3,6 +3,7 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const Dotenv = require('dotenv-webpack');
 
 function initCanisterEnv() {
   let localCanisters, prodCanisters;
@@ -64,6 +65,14 @@ module.exports = {
       stream: require.resolve("stream-browserify/"),
       util: require.resolve("util/"),
     },
+    alias: {
+      Components: path.resolve(__dirname, './src/application/src/components/'),
+      Services: path.resolve(__dirname, './src/application/src/services/'),
+      Constants: path.resolve(__dirname, './src/application/src/constants/'),
+      Utils: path.resolve(__dirname, './src/application/src/utils/'),
+      Styles: path.resolve(__dirname, './src/application/src/styles/'),
+      Assets: path.resolve(__dirname, './src/application/assets/'),
+    },
   },
   output: {
     filename: "index.js",
@@ -71,7 +80,40 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.(js|ts)x?$/, loader: "ts-loader" }
+      { test: /\.(js|ts)x?$/, loader: "ts-loader" },
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+          // Creates `style` nodes from JS strings
+          "style-loader",
+          // Translates CSS into CommonJS
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+            },
+          },
+          // Compiles Sass to CSS
+          {
+            loader: "sass-loader",
+            options: {
+              sourceMap: true,
+              sassOptions: {
+                outputStyle: "compressed",
+              },
+              implementation: require("sass"),
+            },
+          },
+        ],
+      },
+      {
+        test: /\.svg$/,
+        use: ['@svgr/webpack'],
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/i,
+        type: 'asset/resource',
+      },
     ]
   },
   plugins: [
@@ -95,6 +137,7 @@ module.exports = {
       Buffer: [require.resolve("buffer/"), "Buffer"],
       process: require.resolve("process/browser"),
     }),
+    new Dotenv(),
   ],
   // proxy /api to port 8000 during development
   devServer: {
