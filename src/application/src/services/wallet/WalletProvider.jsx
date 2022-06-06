@@ -13,12 +13,18 @@ export const whitelist = [
 
 const WalletProvider = ({ children }) => {
   const [principle, setPrinciple] = useState('');
+  const [isWalletLoading, setIsWalletLoading] = useState(false);
   const plug = useRef(null);
 
   useEffect(() => {
     const verifyConnectionAndAgent = async () => {
+      setIsWalletLoading(true);
+
       try {
+        if (!window.ic.plug) return;
+
         plug.current = window.ic.plug;
+        console.log(plug.current);
         const connected = await plug.current.isConnected();
 
         if (connected && !plug.current.agent) {
@@ -26,10 +32,14 @@ const WalletProvider = ({ children }) => {
         }
 
         if (connected && plug.current.agent) {
-          setPrinciple(plug.current.agent.getPrincipal());
+          const p = await plug.current.agent.getPrincipal();
+
+          setPrinciple(p.toString());
         }
       } catch(e) {
         logger.error(e);
+      } finally {
+        setIsWalletLoading(false);
       }
     };
 
@@ -41,9 +51,11 @@ const WalletProvider = ({ children }) => {
       principle,
       isLoggedIn: Boolean(principle),
       setPrinciple,
-      plug: plug.current,
+      plug,
+      isWalletLoading,
+      setIsWalletLoading,
     };
-  }, [principle]);
+  }, [principle, isWalletLoading]);
 
   return (
     <WalletContext.Provider value={value}>

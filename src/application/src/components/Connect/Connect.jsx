@@ -1,27 +1,46 @@
 import React, { useCallback } from 'react';
-import PlugConnect from '@psychedelic/plug-connect';
 
+import Button from 'Components/Button';
 import { whitelist, useWallet } from 'Services/wallet';
 
+import styles from './Connect.scss';
+
 const Connect = () => {
-  const { setPrinciple, plug } = useWallet();
+  const { setPrinciple, plug, isLoggedIn, principle } = useWallet();
 
   const connectHandler = useCallback(async () => {
-    if (!plug.agent) {
-      await plug.current.createAgent({ whitelist });
+    if (isLoggedIn) {
+      plug.current.disconnect();
+      return;
     }
 
-    const principle = await plug.agent.getPrincipal();
+    if (!plug.current) {
+      window.open('https://plugwallet.ooo/','_blank');
+      return;
+    }
 
-    setPrinciple(principle);
-  }, []);
+    const connected = await plug.current.requestConnect({ whitelist });
+
+    if (!connected) return;
+
+    if (!plug.current.agent) {
+      await plug.current.current.createAgent({ whitelist });
+    }
+
+    const principle = await plug.current.agent.getPrincipal();
+
+    setPrinciple(principle.toString());
+  }, [isLoggedIn]);
 
   return (
-    <PlugConnect
-      whitelist={whitelist}
-      onConnectCallback={connectHandler}
-    />
-  )
+    <Button
+      className={styles.connectBtn}
+      onClick={connectHandler}
+    >
+      {isLoggedIn && principle}
+      {!isLoggedIn && 'Connect to Plug'}
+    </Button>
+  );
 };
 
 export default Connect;

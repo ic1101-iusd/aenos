@@ -5,6 +5,8 @@ const WalletContext = createContext({
   principle: '',
   isLoggedIn: false,
   setPrinciple: () => {},
+  isWalletLoading: false,
+  setIsWalletLoading: () => {},
 });
 
 export default WalletContext;
