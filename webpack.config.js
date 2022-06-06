@@ -70,6 +70,7 @@ module.exports = {
       Services: path.resolve(__dirname, './src/application/src/services/'),
       Constants: path.resolve(__dirname, './src/application/src/constants/'),
       Utils: path.resolve(__dirname, './src/application/src/utils/'),
+      Styles: path.resolve(__dirname, './src/application/src/styles/'),
     },
   },
   output: {
@@ -78,7 +79,32 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.(js|ts)x?$/, loader: "ts-loader" }
+      { test: /\.(js|ts)x?$/, loader: "ts-loader" },
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+          // Creates `style` nodes from JS strings
+          "style-loader",
+          // Translates CSS into CommonJS
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+            },
+          },
+          // Compiles Sass to CSS
+          {
+            loader: "sass-loader",
+            options: {
+              sourceMap: true,
+              sassOptions: {
+                outputStyle: "compressed",
+              },
+              implementation: require("sass"),
+            },
+          },
+        ],
+      },
     ]
   },
   plugins: [

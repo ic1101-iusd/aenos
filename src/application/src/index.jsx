@@ -5,6 +5,8 @@ import { WalletProvider } from 'Services/wallet';
 
 import App from './App';
 
+import 'Styles/index.scss';
+
 render(
   <>
     <WalletProvider>
