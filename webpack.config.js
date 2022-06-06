@@ -71,6 +71,7 @@ module.exports = {
       Constants: path.resolve(__dirname, './src/application/src/constants/'),
       Utils: path.resolve(__dirname, './src/application/src/utils/'),
       Styles: path.resolve(__dirname, './src/application/src/styles/'),
+      Assets: path.resolve(__dirname, './src/application/assets/'),
     },
   },
   output: {
@@ -104,6 +105,14 @@ module.exports = {
             },
           },
         ],
+      },
+      {
+        test: /\.svg$/,
+        use: ['@svgr/webpack'],
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/i,
+        type: 'asset/resource',
       },
     ]
   },
