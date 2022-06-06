@@ -1,5 +1,4 @@
 import Token "../mint_token/token";
-// import FakeBTC "canister:fake_btc";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat "mo:base/Nat";
 import Option "mo:base/Option";
@@ -11,8 +10,28 @@ import P "./position";
 import Error "mo:base/Error";
 
 actor Minter {
+  // FOR DIP20 INTERFACE
+  type TxReceipt = {
+      #Ok: Nat;
+      #Err: {
+          #InsufficientAllowance;
+          #InsufficientBalance;
+          #ErrorOperationStyle;
+          #Unauthorized;
+          #LedgerTrap;
+          #ErrorTo;
+          #Other: Text;
+          #BlockUsed;
+          #AmountTooSmall;
+      };
+  };
+  type DIP20 = actor {
+     transferFrom(from: Principal, to: Principal, value: Nat): async TxReceipt;
+     transfer(to: Principal, value: Nat): async TxReceipt;
+};
   
-  var tokenPrincipal: ?Principal = null;
+  var collateralActor: ?DIP20 = null;
+  var usbActor: ?Token.UsbToken = null;
   var lastPositionId : Nat = 0;
   var collateralPrice = 0;
   var minRisk = 15;
@@ -27,24 +46,22 @@ actor Minter {
     Principal.hash
   );
 
-  public shared({ caller }) func init(): async Principal {
+  public func init(collateralActorText: Text): async () {
     // Do not allow to call init more then once
-    assert Option.isNull(tokenPrincipal);
+    assert Option.isNull(usbActor);
     Cycles.add(1_000_000_000_000);
 
-    let tokenActor = await Token.UsbToken("", "Decentralized USD", "USB", 18, 0, 100);
-    let tp = Principal.fromActor(tokenActor);
-    tokenPrincipal := ?(tp);
-    return tp;
+    usbActor := ?(await Token.UsbToken("", "Decentralized USD", "USB", 18, 0, 100));
+    collateralActor := ?(actor(collateralActorText));
   };
 
   public func getTokenPrincipal(): async Principal {
-    switch (tokenPrincipal) {
+    switch (usbActor) {
       case null {
         throw Error.reject("Contract is not initialized.");
       };
-      case (?tokenPrincipal) {
-        return tokenPrincipal;
+      case (?usbActor) {
+        return Principal.fromActor(usbActor);
       };
     };
   };
@@ -62,22 +79,24 @@ actor Minter {
     assert stableAmount * (100 + minRisk) / 100 <= collateralAmount * collateralPrice;
     let newPosition: P.Position = P.Position(lastPositionId, msg.caller, collateralAmount, stableAmount);
     
-    switch (tokenPrincipal) {
+    switch (collateralActor) {
       case null {
         throw Error.reject("Conister hasn't been initialized.");
       };
-      case (?tokenPrincipal) {
+      case (?collateralActor) {
         lastPositionId += 1;
-        let tokenActor: Token.UsbToken = actor(Principal.toText(tokenPrincipal));
-        // Wait for OK condtion
-        let smth = await tokenActor.transferFrom(msg.caller, Principal.fromActor(Minter), stableAmount);
-        switch(smth) {
+        let result = await collateralActor.transferFrom(msg.caller, Principal.fromActor(Minter), collateralAmount);
+        switch(result) {
           case (#Err(_)) { throw Error.reject("Could not execute transfer from."); };
           case (#Ok(_)) {};
         };
       };
     };
-    positionMap.put(lastPositionId, newPosition);
+    positionMap.put(newPosition.getId(), newPosition);
+     // Just need to assign it for some reason =/
+    let _ = do ? {
+      usbActor!.mint(msg.caller, stableAmount)
+    };
   };
 
 

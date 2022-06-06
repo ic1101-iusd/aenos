@@ -9,6 +9,9 @@ module {
         var stableAmount = stableAmountInit;
         var deleted = false;
         
+        public func getId(): Nat {
+            id
+        };
 
         public func setCollateral(newAmount: Nat) {
             collateralAmount := newAmount;
