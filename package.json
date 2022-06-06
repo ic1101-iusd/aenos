@@ -18,7 +18,9 @@
     "deploy:protocol": "dfx deploy --network ic protocol --no-wallet",
     "deploy:application": "dfx deploy --network ic application --no-wallet",
     "deploy:local:protocol": "dfx deploy protocol",
-    "deploy:local:application": "dfx deploy application"
+    "deploy:local:application": "dfx deploy application",
+    "install:fbtc": "./src/fake_btc/install.sh",
+    "install:usb": "./src/mint_token/install.sh"
   },
   "devDependencies": {
     "@dfinity/agent": "0.11.3",
