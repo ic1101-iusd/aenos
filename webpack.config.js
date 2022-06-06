@@ -3,6 +3,7 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const Dotenv = require('dotenv-webpack');
 
 function initCanisterEnv() {
   let localCanisters, prodCanisters;
@@ -64,6 +65,12 @@ module.exports = {
       stream: require.resolve("stream-browserify/"),
       util: require.resolve("util/"),
     },
+    alias: {
+      Components: path.resolve(__dirname, './src/application/src/components/'),
+      Services: path.resolve(__dirname, './src/application/src/services/'),
+      Constants: path.resolve(__dirname, './src/application/src/constants/'),
+      Utils: path.resolve(__dirname, './src/application/src/utils/'),
+    },
   },
   output: {
     filename: "index.js",
@@ -95,6 +102,7 @@ module.exports = {
       Buffer: [require.resolve("buffer/"), "Buffer"],
       process: require.resolve("process/browser"),
     }),
+    new Dotenv(),
   ],
   // proxy /api to port 8000 during development
   devServer: {
