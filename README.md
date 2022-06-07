@@ -4,10 +4,10 @@
 ````
 dfx start --clean --background
 dfx canister create --all
+npm i
 dfx build
 dfx deploy
 
-npm i
 npm start
 
 // separetly need to install tokens (copy from the installation script)
