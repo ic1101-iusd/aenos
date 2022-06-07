@@ -1,7 +1,9 @@
 import { useEffect, useCallback, useState } from 'react';
+import { Principal } from '@dfinity/principal';
 
 import logger from 'Utils/logger';
 import config from 'Constants/config';
+import { PRINCIPLE_KEY } from 'Constants/storageKeys';
 
 export const whitelist = [
   config.canisterIdVault,
@@ -30,11 +32,13 @@ const useConnect = ({ plug }) => {
     const p = await plug.current.agent.getPrincipal();
 
     setPrinciple(p);
+    localStorage.setItem(PRINCIPLE_KEY, p.toString());
   }, []);
 
   const disconnect = useCallback(() => {
     plug.current.disconnect();
     setPrinciple(null);
+    localStorage.removeItem(PRINCIPLE_KEY);
   }, []);
 
   useEffect(() => {
@@ -42,6 +46,12 @@ const useConnect = ({ plug }) => {
       setIsConnecting(true);
 
       try {
+        const storedPrinciple = localStorage.getItem(PRINCIPLE_KEY);
+        if (storedPrinciple) {
+          setPrinciple(Principal.fromText(storedPrinciple));
+          return;
+        }
+
         if (!window.ic.plug) return;
 
         plug.current = window.ic.plug;
@@ -55,6 +65,7 @@ const useConnect = ({ plug }) => {
           const p = await plug.current.agent.getPrincipal();
 
           setPrinciple(p);
+          localStorage.setItem(PRINCIPLE_KEY, p.toString());
         }
       } catch(e) {
         logger.error(e);
