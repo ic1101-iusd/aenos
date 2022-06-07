@@ -1,11 +1,21 @@
 #!/usr/bin/env bash
 CANISTER_ID=${CANISTER_ID:="qoctq-giaaa-aaaaa-aaaea-cai"} #pass default contract
-collateralPrice=0
+CollateralPrice=0
+
 if [[ -n "$1" ]]
 then
-    collateralPrice=$1
+    CollateralPrice=$1
 else
-    collateralPrice=30000 #default value
+    CollateralPrice=30000 #default value
 fi
-echo "Canister $CANISTER_ID collateralPrice $collateralPrice"
-dfx canister call $CANISTER_ID setcollateralPrice $collateralPrice
+
+echo ">>>> Params : Canister $CANISTER_ID CollateralPrice $CollateralPrice"
+if [ "$ICP_NETWORK" == "LOCAL" ];
+then
+    echo ">>>> NETWORK: LOCAL"
+    dfx canister call $CANISTER_ID setCollateralPrice "($CollateralPrice)"
+else
+    echo ">>>> NETWORK: IC"
+    dfx canister --network ic call $CANISTER_ID  setCollateralPrice "($CollateralPrice)"
+fi
+

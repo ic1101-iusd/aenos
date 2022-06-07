@@ -17,25 +17,28 @@ npm start
 
 ````
 ## Update collateral price
-Run
+
+#### By defaul it runs in main
+Switch to test
 ````
-epxort CANISTER_ID=qoctq-giaaa-aaaaa-aaaea-cai
+export ICP_NETWORK='LOCAL'
+````
+Switch to Main 
+````
+unset ICP_NETWORK
+````
+Export your canister or override default in script
+````
+epxort CANISTER_ID=qoctq-giaaa-aaaaa-aaaea-cai 
+````
+Set price 40000
+````
 sh set_collateral_price.sh 40000
 ````
-Output 
+Or use default price 30000
 ````
-Canister qoctq-giaaa-aaaaa-aaaea-cai collateralPrice 40000
-````
-Run
-````
-epxort CANISTER_ID=qoctq-giaaa-aaaaa-aaaea-cai
 sh set_collateral_price.sh
 ````
-Output default price 30000
-````
-Canister qoctq-giaaa-aaaaa-aaaea-cai collateralPrice 30000 
-````
-
 ### Commit marks:
 - build
 - chore
