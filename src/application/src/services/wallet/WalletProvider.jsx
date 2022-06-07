@@ -11,9 +11,16 @@ export const whitelist = [
   config.canisterIdBtcFt,
 ];
 
+const coins = [
+  config.canisterIdBtcFt,
+  config.canisterIdUsbFt,
+];
+
 const WalletProvider = ({ children }) => {
   const [principle, setPrinciple] = useState('');
   const [isWalletLoading, setIsWalletLoading] = useState(false);
+  const [balances, setBalances] = useState([]);
+
   const plug = useRef(null);
 
   useEffect(() => {
@@ -24,7 +31,6 @@ const WalletProvider = ({ children }) => {
         if (!window.ic.plug) return;
 
         plug.current = window.ic.plug;
-        console.log(plug.current);
         const connected = await plug.current.isConnected();
 
         if (connected && !plug.current.agent) {
@@ -35,6 +41,13 @@ const WalletProvider = ({ children }) => {
           const p = await plug.current.agent.getPrincipal();
 
           setPrinciple(p.toString());
+
+          // TODO: get balances through network, not plug
+          const b = await plug.current.requestBalance();
+
+          setBalances(
+            b.filter(bal => coins.includes(bal.canisterId))
+          );
         }
       } catch(e) {
         logger.error(e);
@@ -54,8 +67,9 @@ const WalletProvider = ({ children }) => {
       plug,
       isWalletLoading,
       setIsWalletLoading,
+      balances,
     };
-  }, [principle, isWalletLoading]);
+  }, [principle, isWalletLoading, balances]);
 
   return (
     <WalletContext.Provider value={value}>

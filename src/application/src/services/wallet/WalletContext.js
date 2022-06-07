@@ -7,6 +7,7 @@ const WalletContext = createContext({
   setPrinciple: () => {},
   isWalletLoading: false,
   setIsWalletLoading: () => {},
+  balances: [],
 });
 
 export default WalletContext;

@@ -66,12 +66,14 @@ module.exports = {
       util: require.resolve("util/"),
     },
     alias: {
+      Containers: path.resolve(__dirname, './src/application/src/containers/'),
       Components: path.resolve(__dirname, './src/application/src/components/'),
       Services: path.resolve(__dirname, './src/application/src/services/'),
       Constants: path.resolve(__dirname, './src/application/src/constants/'),
       Utils: path.resolve(__dirname, './src/application/src/utils/'),
       Styles: path.resolve(__dirname, './src/application/src/styles/'),
       Assets: path.resolve(__dirname, './src/application/assets/'),
+      Declarations: path.resolve(__dirname, './src/declarations/'),
     },
   },
   output: {

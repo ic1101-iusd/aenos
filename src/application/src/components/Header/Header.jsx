@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Connect from 'Components/Connect';
+import Connect from 'Containers/Connect';
 import logo from 'Assets/logo.png';
 
 import styles from './Header.scss';
