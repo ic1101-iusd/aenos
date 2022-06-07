@@ -4,10 +4,9 @@ const WalletContext = createContext({
   plug: null,
   principle: '',
   isLoggedIn: false,
-  setPrinciple: () => {},
-  isWalletLoading: false,
-  setIsWalletLoading: () => {},
-  balances: [],
+  isConnecting: false,
+  connect: () => {},
+  disconnect: () => {},
 });
 
 export default WalletContext;
