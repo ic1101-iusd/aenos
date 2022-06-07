@@ -16,6 +16,25 @@ npm start
 // do not forget to remove --netowrk ic mainnet flag.
 
 ````
+## Update collateral price
+Run
+````
+epxort CANISTER_ID=qoctq-giaaa-aaaaa-aaaea-cai
+sh set_collateral_price.sh 40000
+````
+Output 
+````
+Canister qoctq-giaaa-aaaaa-aaaea-cai collateralPrice 40000
+````
+Run
+````
+epxort CANISTER_ID=qoctq-giaaa-aaaaa-aaaea-cai
+sh set_collateral_price.sh
+````
+Output default price 30000
+````
+Canister qoctq-giaaa-aaaaa-aaaea-cai collateralPrice 30000 
+````
 
 ### Commit marks:
 - build
