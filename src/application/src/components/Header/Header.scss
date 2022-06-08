@@ -1,4 +1,5 @@
 @use 'Styles/variables';
+@use 'Styles/mix';
 
 .header {
   background-color: variables.$background-secondary-color;
@@ -13,4 +14,6 @@
   width: 70px;
   height: 70px;
   border-radius: 5px;
+
+  @include mix.hoverScale();
 }

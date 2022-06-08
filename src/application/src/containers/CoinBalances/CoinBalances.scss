@@ -1,4 +1,5 @@
 @use 'Styles/variables';
+@use 'Styles/mix';
 
 .coinBalances {
   width: 250px;
@@ -19,9 +20,7 @@
   margin: 10px 0;
   cursor: default;
 
-  &:hover {
-    transform: scale(1.03);
-  }
+  @include mix.hoverScale();
 }
 
 .leftGroup {
