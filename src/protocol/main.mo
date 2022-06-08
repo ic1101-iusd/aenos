@@ -7,6 +7,7 @@ import HashMap "mo:base/HashMap";
 import Prim "mo:prim";
 import P "./position";
 import Error "mo:base/Error";
+import Result "mo:base/Result";
 
 actor Minter {
   // FOR DIP20 INTERFACE
@@ -29,12 +30,16 @@ actor Minter {
     transferFrom(from: Principal, to: Principal, value: Nat): async TxReceipt;
     transfer(to: Principal, value: Nat): async TxReceipt;
     mint(to: Principal, value: Nat): async TxReceipt;
-};
+    burn(amount: Nat): async TxReceipt;
+  };
+
+  public type ProtocolError = { #transferFromError; };
   
   var collateralActor: ?DIP20 = null;
   var usbActor: ?DIP20 = null;
   var lastPositionId : Nat = 0;
   var collateralPrice = 0;
+  let priceDecimals = 8;
   var minRisk = 15;
   let positionMap = HashMap.HashMap<Nat, P.Position>(
     0,
@@ -90,9 +95,9 @@ actor Minter {
     }
   };
 
-  public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async () {
+  public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<(), ProtocolError> {
     // Check if stable is overcollaterized enough
-    assert stableAmount * (100 + minRisk) / 100 <= collateralAmount * collateralPrice;
+    assert stableAmount * (100 + minRisk) / 100 <= collateralAmount * collateralPrice / (10**priceDecimals);
     let newPosition: P.Position = P.Position(lastPositionId, msg.caller, collateralAmount, stableAmount);
     
     switch (collateralActor) {
@@ -113,10 +118,37 @@ actor Minter {
     let _ = do ? {
       usbActor!.mint(msg.caller, stableAmount)
     };
+    #ok(())
   };
 
+  public shared(msg) func closePosition(id: Nat) : async Result.Result<(), ProtocolError> {
+    let position = switch(positionMap.get(id)) {
+      case null {
+        throw Error.reject("No position found."); 
+      };
+      case (?position) {
+        position
+      };
+    };
+    if (position.deleted) {
+      throw Error.reject("The position already closed or closing."); 
+    };
+    position.deleted := true;
+    let _ = do ? {
+      let res = await usbActor!.transferFrom(msg.caller, Principal.fromActor(Minter), position.stableAmount);
+      switch(res) {
+        case (#Err(_)) { 
+          position.deleted := false;
+          return #err(#transferFromError);
+        };
+        case (#Ok(_)) {};
+      };
 
-
+      let _ = usbActor!.burn(position.stableAmount);
+      collateralActor!.transfer(msg.caller, position.collateralAmount);
+    };
+    #ok(())
+  };
 
 
 };

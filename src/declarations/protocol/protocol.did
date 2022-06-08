@@ -1,6 +1,13 @@
 type SharedPosition = record {};
+type Result = 
+ variant {
+   err: ProtocolError;
+   ok;
+ };
+type ProtocolError = variant {transferFromError;};
 service : {
-  createPosition: (nat, nat) -> ();
+  closePosition: (nat) -> (Result);
+  createPosition: (nat, nat) -> (Result);
   getCollateralPrice: () -> (nat) query;
   getPosition: (nat) -> (opt SharedPosition) query;
   getTokenPrincipal: () -> (principal) query;
