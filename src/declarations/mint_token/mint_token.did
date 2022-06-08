@@ -1,36 +1,3 @@
-type UsbToken = 
- service {
-   allowance: (principal, principal) -> (nat) query;
-   approve: (principal, nat) -> (TxReceipt);
-   balanceOf: (principal) -> (nat) query;
-   burn: (nat) -> (TxReceipt);
-   decimals: () -> (nat8) query;
-   getAllowanceSize: () -> (nat) query;
-   getHolders: (nat, nat) -> (vec record {
-                                    principal;
-                                    nat;
-                                  }) query;
-   getMetadata: () -> (Metadata) query;
-   getTokenFee: () -> (nat) query;
-   getTokenInfo: () -> (TokenInfo) query;
-   getUserApprovals: (principal) -> (vec record {
-                                           principal;
-                                           nat;
-                                         }) query;
-   historySize: () -> (nat) query;
-   logo: () -> (text) query;
-   mint: (principal, nat) -> (TxReceipt);
-   name: () -> (text) query;
-   setFee: (nat) -> () oneway;
-   setFeeTo: (principal) -> () oneway;
-   setLogo: (text) -> () oneway;
-   setName: (text) -> () oneway;
-   setOwner: (principal) -> () oneway;
-   symbol: () -> (text) query;
-   totalSupply: () -> (nat) query;
-   transfer: (principal, nat) -> (TxReceipt);
-   transferFrom: (principal, principal, nat) -> (TxReceipt);
- };
 type TxReceipt = 
  variant {
    Err:
@@ -57,6 +24,40 @@ type TokenInfo =
    metadata: Metadata;
  };
 type Time = int;
+type MintToken = 
+ service {
+   allowance: (principal, principal) -> (nat) query;
+   approve: (principal, nat) -> (TxReceipt);
+   balanceOf: (principal) -> (nat) query;
+   burn: (nat) -> (TxReceipt);
+   decimals: () -> (nat8) query;
+   getAllowanceSize: () -> (nat) query;
+   getHolders: (nat, nat) -> (vec record {
+                                    principal;
+                                    nat;
+                                  }) query;
+   getMetadata: () -> (Metadata) query;
+   getTokenFee: () -> (nat) query;
+   getTokenInfo: () -> (TokenInfo) query;
+   getUserApprovals: (principal) -> (vec record {
+                                           principal;
+                                           nat;
+                                         }) query;
+   historySize: () -> (nat) query;
+   init: () -> ();
+   logo: () -> (text) query;
+   mint: (principal, nat) -> (TxReceipt);
+   name: () -> (text) query;
+   setFee: (nat) -> () oneway;
+   setFeeTo: (principal) -> () oneway;
+   setLogo: (text) -> () oneway;
+   setName: (text) -> () oneway;
+   setOwner: (principal) -> () oneway;
+   symbol: () -> (text) query;
+   totalSupply: () -> (nat) query;
+   transfer: (principal, nat) -> (TxReceipt);
+   transferFrom: (principal, principal, nat) -> (TxReceipt);
+ };
 type Metadata = 
  record {
    decimals: nat8;
@@ -67,4 +68,4 @@ type Metadata =
    symbol: text;
    totalSupply: nat;
  };
-service : (text, text, text, nat8, nat, principal, nat) -> UsbToken
+service : (text, text, text, nat8, nat, nat) -> MintToken

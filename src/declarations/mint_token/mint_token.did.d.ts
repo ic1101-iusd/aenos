@@ -10,6 +10,33 @@ export interface Metadata {
   'totalSupply' : bigint,
   'symbol' : string,
 }
+export interface MintToken {
+  'allowance' : ActorMethod<[Principal, Principal], bigint>,
+  'approve' : ActorMethod<[Principal, bigint], TxReceipt>,
+  'balanceOf' : ActorMethod<[Principal], bigint>,
+  'burn' : ActorMethod<[bigint], TxReceipt>,
+  'decimals' : ActorMethod<[], number>,
+  'getAllowanceSize' : ActorMethod<[], bigint>,
+  'getHolders' : ActorMethod<[bigint, bigint], Array<[Principal, bigint]>>,
+  'getMetadata' : ActorMethod<[], Metadata>,
+  'getTokenFee' : ActorMethod<[], bigint>,
+  'getTokenInfo' : ActorMethod<[], TokenInfo>,
+  'getUserApprovals' : ActorMethod<[Principal], Array<[Principal, bigint]>>,
+  'historySize' : ActorMethod<[], bigint>,
+  'init' : ActorMethod<[], undefined>,
+  'logo' : ActorMethod<[], string>,
+  'mint' : ActorMethod<[Principal, bigint], TxReceipt>,
+  'name' : ActorMethod<[], string>,
+  'setFee' : ActorMethod<[bigint], undefined>,
+  'setFeeTo' : ActorMethod<[Principal], undefined>,
+  'setLogo' : ActorMethod<[string], undefined>,
+  'setName' : ActorMethod<[string], undefined>,
+  'setOwner' : ActorMethod<[Principal], undefined>,
+  'symbol' : ActorMethod<[], string>,
+  'totalSupply' : ActorMethod<[], bigint>,
+  'transfer' : ActorMethod<[Principal, bigint], TxReceipt>,
+  'transferFrom' : ActorMethod<[Principal, Principal, bigint], TxReceipt>,
+}
 export type Time = bigint;
 export interface TokenInfo {
   'holderNumber' : bigint,
@@ -31,30 +58,4 @@ export type TxReceipt = { 'Ok' : bigint } |
       { 'BlockUsed' : null } |
       { 'AmountTooSmall' : null }
   };
-export interface UsbToken {
-  'allowance' : ActorMethod<[Principal, Principal], bigint>,
-  'approve' : ActorMethod<[Principal, bigint], TxReceipt>,
-  'balanceOf' : ActorMethod<[Principal], bigint>,
-  'burn' : ActorMethod<[bigint], TxReceipt>,
-  'decimals' : ActorMethod<[], number>,
-  'getAllowanceSize' : ActorMethod<[], bigint>,
-  'getHolders' : ActorMethod<[bigint, bigint], Array<[Principal, bigint]>>,
-  'getMetadata' : ActorMethod<[], Metadata>,
-  'getTokenFee' : ActorMethod<[], bigint>,
-  'getTokenInfo' : ActorMethod<[], TokenInfo>,
-  'getUserApprovals' : ActorMethod<[Principal], Array<[Principal, bigint]>>,
-  'historySize' : ActorMethod<[], bigint>,
-  'logo' : ActorMethod<[], string>,
-  'mint' : ActorMethod<[Principal, bigint], TxReceipt>,
-  'name' : ActorMethod<[], string>,
-  'setFee' : ActorMethod<[bigint], undefined>,
-  'setFeeTo' : ActorMethod<[Principal], undefined>,
-  'setLogo' : ActorMethod<[string], undefined>,
-  'setName' : ActorMethod<[string], undefined>,
-  'setOwner' : ActorMethod<[Principal], undefined>,
-  'symbol' : ActorMethod<[], string>,
-  'totalSupply' : ActorMethod<[], bigint>,
-  'transfer' : ActorMethod<[Principal, bigint], TxReceipt>,
-  'transferFrom' : ActorMethod<[Principal, Principal, bigint], TxReceipt>,
-}
-export interface _SERVICE extends UsbToken {}
+export interface _SERVICE extends MintToken {}

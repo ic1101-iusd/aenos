@@ -22,13 +22,12 @@ import ExperimentalCycles "mo:base/ExperimentalCycles";
 import Cap "./cap/Cap";
 import Root "./cap/Root";
 
-shared(msg) actor class UsbToken(
+shared(msg) actor class MintToken(
     _logo: Text,
     _name: Text,
     _symbol: Text,
     _decimals: Nat8,
     _totalSupply: Nat,
-    _owner: Principal,
     _fee: Nat
     ) = this {
     type Operation = Types.Operation;
@@ -59,7 +58,8 @@ shared(msg) actor class UsbToken(
         };
     };
 
-    private stable var owner_ : Principal = _owner;
+    private stable var initialized: Bool = false;
+    private stable var owner_ : Principal = msg.caller;
     private stable var logo_ : Text = _logo;
     private stable var name_ : Text = _name;
     private stable var decimals_ : Nat8 = _decimals;
@@ -154,6 +154,12 @@ shared(msg) actor class UsbToken(
     *           logo/name/symbol/decimal/totalSupply/balanceOf/allowance/getMetadata
     *           historySize/getTransaction/getTransactions
     */
+
+    public shared(msg) func init() : async() {
+        assert initialized == false;
+        initialized := true;
+        owner_ := msg.caller;
+    };
 
     /// Transfers value amount of tokens to Principal to.
     public shared(msg) func transfer(to: Principal, value: Nat) : async TxReceipt {
