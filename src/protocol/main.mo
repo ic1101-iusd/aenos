@@ -46,13 +46,17 @@ actor Minter {
     Principal.hash
   );
 
-  public func init(collateralActorText: Text): async () {
+  public func init(collateralActorText: Text, usbActorText: Text): async () {
     // Do not allow to call init more then once
+    assert Option.isNull(collateralActor);
     assert Option.isNull(usbActor);
-    Cycles.add(1_000_000_000_000);
-
-    usbActor := ?(await Token.UsbToken("", "Decentralized USD", "USB", 18, 0, 100));
+    
     collateralActor := ?(actor(collateralActorText));
+    usbActor := ?(actor(usbActorText));
+    // Take ownership over usb token
+    let _ = do ? {
+      await usbActor!.init();
+    };
   };
 
   public query func getTokenPrincipal(): async Principal {
@@ -61,8 +65,8 @@ actor Minter {
         throw Error.reject("Contract is not initialized.");
       };
       case (?usbActor) {
-        return Principal.fromActor(usbActor);
-      };
+       Principal.fromActor(usbActor)
+      }
     };
   };
 
