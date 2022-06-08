@@ -1,0 +1,48 @@
+@use 'Styles/variables';
+
+.coinBalances {
+  width: 250px;
+  border-radius: 25px;
+  background-color: variables.$background-secondary-color;
+  margin: 20px auto;
+  padding: 5px 20px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
+  cursor: default;
+
+  &:hover {
+    transform: scale(1.03);
+  }
+}
+
+.leftGroup {
+  display: flex;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  margin-right: 15px;
+}
+
+.name {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.symbol {
+  font-size: 0.7rem;
+}
+
+.amount {
+
+}

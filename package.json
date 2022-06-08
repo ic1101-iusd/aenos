@@ -1,5 +1,5 @@
 {
-  "name": "application_assets",
+  "name": "application",
   "version": "0.1.0",
   "description": "Internet Computer starter application",
   "keywords": [
@@ -13,24 +13,37 @@
     "prebuild": "npm run copy:types",
     "start": "webpack serve --mode development --env development",
     "prestart": "npm run copy:types",
-    "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --exclude='*.most' --delete src/declarations"
+    "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --exclude='*.most' --delete src/declarations",
+    "deploy:all": "dfx deploy --network ic --no-wallet",
+    "deploy:protocol": "dfx deploy --network ic protocol --no-wallet",
+    "deploy:application": "dfx deploy --network ic application --no-wallet",
+    "deploy:local:protocol": "dfx deploy protocol",
+    "deploy:local:application": "dfx deploy application",
+    "install:fbtc": "./src/fake_btc/install.sh",
+    "install:usb": "./src/mint_token/install.sh"
   },
   "devDependencies": {
     "@dfinity/agent": "0.11.3",
     "@dfinity/candid": "0.11.3",
     "@dfinity/principal": "0.11.3",
+    "@svgr/webpack": "^6.2.1",
     "assert": "2.0.0",
     "buffer": "6.0.3",
     "copy-webpack-plugin": "^9.0.1",
+    "css-loader": "^6.7.1",
+    "dotenv-webpack": "^7.1.0",
     "events": "3.3.0",
     "html-webpack-plugin": "5.5.0",
     "process": "0.11.10",
+    "sass": "^1.52.2",
+    "sass-loader": "^13.0.0",
     "stream-browserify": "3.0.0",
+    "style-loader": "^3.3.1",
     "terser-webpack-plugin": "5.2.5",
     "ts-loader": "^9.3.0",
     "typescript": "^4.7.3",
     "util": "0.12.4",
-    "webpack": "5.72.0",
+    "webpack": "^5.72.0",
     "webpack-cli": "4.9.2",
     "webpack-dev-server": "^4.8.1"
   },
@@ -44,6 +57,8 @@
     "last 2 edge version"
   ],
   "dependencies": {
+    "classnames": "^2.3.1",
+    "memoizee": "^0.4.15",
     "react": "^18.1.0",
     "react-dom": "^18.1.0"
   }

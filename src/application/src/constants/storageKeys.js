@@ -1,0 +1,1 @@
+export const PRINCIPLE_KEY = 'PRINCIPLE_KEY';

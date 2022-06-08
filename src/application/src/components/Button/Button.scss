@@ -1,0 +1,19 @@
+@use 'Styles/variables';
+
+.button {
+  border: 0;
+  padding: 0 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  background-color: variables.$primary-color;
+  height: 35px;
+
+  &:hover {
+    transform: scale(1.03);
+  }
+
+  &:active {
+    opacity: 0.9;
+  }
+}
