@@ -1,4 +1,3 @@
-import Token "../mint_token/token";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat "mo:base/Nat";
 import Option "mo:base/Option";
@@ -26,12 +25,14 @@ actor Minter {
       };
   };
   type DIP20 = actor {
-     transferFrom(from: Principal, to: Principal, value: Nat): async TxReceipt;
-     transfer(to: Principal, value: Nat): async TxReceipt;
+    init(): async ();
+    transferFrom(from: Principal, to: Principal, value: Nat): async TxReceipt;
+    transfer(to: Principal, value: Nat): async TxReceipt;
+    mint(to: Principal, value: Nat): async TxReceipt;
 };
   
   var collateralActor: ?DIP20 = null;
-  var usbActor: ?Token.UsbToken = null;
+  var usbActor: ?DIP20 = null;
   var lastPositionId : Nat = 0;
   var collateralPrice = 0;
   var minRisk = 15;

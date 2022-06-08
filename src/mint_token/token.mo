@@ -22,7 +22,7 @@ import ExperimentalCycles "mo:base/ExperimentalCycles";
 import Cap "./cap/Cap";
 import Root "./cap/Root";
 
-shared(msg) actor class UsbToken(
+shared(msg) actor class MintToken(
     _logo: Text,
     _name: Text,
     _symbol: Text,

@@ -21,7 +21,7 @@
       "main": "src/fake_btc/token.mo",
       "type": "motoko"
     },
-    "usbtoken": {
+    "mint_token": {
       "main": "src/mint_token/token.mo",
       "type": "motoko"
     }

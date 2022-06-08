@@ -31,7 +31,7 @@ export const idlFactory = ({ IDL }) => {
     'cycles' : IDL.Nat,
     'feeTo' : IDL.Principal,
   });
-  const UsbToken = IDL.Service({
+  const MintToken = IDL.Service({
     'allowance' : IDL.Func(
         [IDL.Principal, IDL.Principal],
         [IDL.Nat],
@@ -56,6 +56,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'historySize' : IDL.Func([], [IDL.Nat], ['query']),
+    'init' : IDL.Func([], [], []),
     'logo' : IDL.Func([], [IDL.Text], ['query']),
     'mint' : IDL.Func([IDL.Principal, IDL.Nat], [TxReceipt], []),
     'name' : IDL.Func([], [IDL.Text], ['query']),
@@ -73,16 +74,8 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
   });
-  return UsbToken;
+  return MintToken;
 };
 export const init = ({ IDL }) => {
-  return [
-    IDL.Text,
-    IDL.Text,
-    IDL.Text,
-    IDL.Nat8,
-    IDL.Nat,
-    IDL.Principal,
-    IDL.Nat,
-  ];
+  return [IDL.Text, IDL.Text, IDL.Text, IDL.Nat8, IDL.Nat, IDL.Nat];
 };

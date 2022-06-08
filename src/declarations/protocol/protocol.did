@@ -1,3 +1,9 @@
+type SharedPosition = record {};
 service : {
-  greet: (text) -> (text);
+  createPosition: (nat, nat) -> ();
+  getCollateralPrice: () -> (nat) query;
+  getPosition: (nat) -> (opt SharedPosition) query;
+  getTokenPrincipal: () -> (principal) query;
+  init: (text, text) -> ();
+  setCollateralPrice: (nat) -> ();
 }
