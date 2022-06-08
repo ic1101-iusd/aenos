@@ -2,12 +2,20 @@ import Nat "mo:base/Nat";
 import Float "mo:base/Float";
 import Principal "mo:base/Principal";
 module {
+    public class SharedPosition(position: Position) {
+        let id: Nat = position.id;
+        let owner: Principal = position.owner;
+        let collateralAmount: Nat = position.collateralAmount;
+        let stableAmount: Nat = position.stableAmount;
+        let deleted: Bool = position.deleted;
+    };
+
     public class Position(idInit: Nat, ownerInit: Principal, collateralAmountInit: Nat, stableAmountInit: Nat) {
-        let id = idInit;
-        let owner = ownerInit;
-        var collateralAmount = collateralAmountInit;
-        var stableAmount = stableAmountInit;
-        var deleted = false;
+        public let id = idInit;
+        public let owner = ownerInit;
+        public var collateralAmount = collateralAmountInit;
+        public var stableAmount = stableAmountInit;
+        public var deleted = false;
         
         public func getId(): Nat {
             id

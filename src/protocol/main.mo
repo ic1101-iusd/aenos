@@ -55,7 +55,7 @@ actor Minter {
     collateralActor := ?(actor(collateralActorText));
   };
 
-  public func getTokenPrincipal(): async Principal {
+  public query func getTokenPrincipal(): async Principal {
     switch (usbActor) {
       case null {
         throw Error.reject("Contract is not initialized.");
@@ -72,6 +72,17 @@ actor Minter {
 
   public query func getCollateralPrice() : async Nat {
       collateralPrice
+  };
+
+  public query func getPosition(id: Nat): async ?P.SharedPosition {
+    switch(positionMap.get(id)) {
+      case null {
+        null
+      };
+      case (?position) {
+        ?(P.SharedPosition(position))
+      }
+    }
   };
 
   public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async () {
