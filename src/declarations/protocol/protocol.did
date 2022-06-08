@@ -12,5 +12,6 @@ service : {
   getPosition: (nat) -> (opt SharedPosition) query;
   getTokenPrincipal: () -> (principal) query;
   init: (text, text) -> ();
+  liquidatePosition: (nat) -> (Result);
   setCollateralPrice: (nat) -> ();
 }

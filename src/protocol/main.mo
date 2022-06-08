@@ -122,7 +122,7 @@ actor Minter {
   };
 
   public shared(msg) func closePosition(id: Nat) : async Result.Result<(), ProtocolError> {
-    let position = switch(positionMap.get(id)) {
+    let p = switch(positionMap.get(id)) {
       case null {
         throw Error.reject("No position found."); 
       };
@@ -130,22 +130,56 @@ actor Minter {
         position
       };
     };
-    if (position.deleted) {
+    if (p.deleted) {
       throw Error.reject("The position already closed or closing."); 
     };
-    position.deleted := true;
+    if (p.owner != msg.caller) {
+      throw Error.reject("It is not your position."); 
+    };
+
+    await processClosePosition(p, msg.caller)
+  };
+
+
+  // There is some copy-past because motoko has strage await behaivior for inner calls.
+  // TODO make code style research
+  public shared(msg) func liquidatePosition(id: Nat) : async Result.Result<(), ProtocolError> {
+    let p = switch(positionMap.get(id)) {
+      case null {
+        throw Error.reject("No position found."); 
+      };
+      case (?position) {
+        position
+      };
+    };
+    if (p.deleted) {
+      throw Error.reject("The position already closed or closing."); 
+    };
+    if (p.stableAmount * (100 + minRisk) / 100 <= p.collateralAmount * collateralPrice / (10**priceDecimals)) {
+      throw Error.reject("Position is fine, no liquidation required."); 
+    };
+
+    await processClosePosition(p, msg.caller)
+  };
+
+  // This function make call more expensive and longer
+  // But for now readability is more important
+  private func processClosePosition(p: P.Position, caller: Principal) : async Result.Result<(), ProtocolError> {
+    p.deleted := true;
+    positionMap.put(p.id, p);
     let _ = do ? {
-      let res = await usbActor!.transferFrom(msg.caller, Principal.fromActor(Minter), position.stableAmount);
+      let res = await usbActor!.transferFrom(caller, Principal.fromActor(Minter), p.stableAmount);
       switch(res) {
         case (#Err(_)) { 
-          position.deleted := false;
+          p.deleted := false;
+          positionMap.put(p.id, p);
           return #err(#transferFromError);
         };
         case (#Ok(_)) {};
       };
 
-      let _ = usbActor!.burn(position.stableAmount);
-      collateralActor!.transfer(msg.caller, position.collateralAmount);
+      let _ = usbActor!.burn(p.stableAmount);
+      collateralActor!.transfer(caller, p.collateralAmount);
     };
     #ok(())
   };

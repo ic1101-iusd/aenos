@@ -9,6 +9,7 @@ export const idlFactory = ({ IDL }) => {
     'getPosition' : IDL.Func([IDL.Nat], [IDL.Opt(SharedPosition)], ['query']),
     'getTokenPrincipal' : IDL.Func([], [IDL.Principal], ['query']),
     'init' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'liquidatePosition' : IDL.Func([IDL.Nat], [Result], []),
     'setCollateralPrice' : IDL.Func([IDL.Nat], [], []),
   });
 };

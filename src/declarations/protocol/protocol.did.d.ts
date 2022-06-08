@@ -12,5 +12,6 @@ export interface _SERVICE {
   'getPosition' : ActorMethod<[bigint], [] | [SharedPosition]>,
   'getTokenPrincipal' : ActorMethod<[], Principal>,
   'init' : ActorMethod<[string, string], undefined>,
+  'liquidatePosition' : ActorMethod<[bigint], Result>,
   'setCollateralPrice' : ActorMethod<[bigint], undefined>,
 }
