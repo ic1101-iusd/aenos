@@ -145,7 +145,6 @@ actor Minter {
     await processClosePosition(p, msg.caller)
   };
 
-
   // There is some copy-past because motoko has strage await behaivior for inner calls.
   // TODO make code style research
   public shared(msg) func liquidatePosition(id: Nat) : async Result.Result<(), ProtocolError> {
