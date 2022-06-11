@@ -11,9 +11,14 @@
 @mixin card {
   border-radius: 25px;
   background-color: variables.$background-secondary-color;
-  padding: 5px 20px;
+  padding: 16px 20px;
 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+@mixin title {
+  font-size: 1.5rem;
+  font-weight: bold;
 }
