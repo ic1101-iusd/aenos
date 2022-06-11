@@ -1,11 +1,15 @@
 import React from 'react';
 
+import Input from 'Components/Input';
+
 import styles from './PositionForm.scss';
 
 const PositionForm = () => {
   return (
     <div className={styles.positionForm}>
-      <input type="text" />
+      <Input
+        type="number"
+      />
     </div>
   );
 };

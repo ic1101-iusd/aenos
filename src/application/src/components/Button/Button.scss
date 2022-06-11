@@ -6,7 +6,7 @@
   padding: 0 10px;
   border-radius: 10px;
   cursor: pointer;
-  background-color: variables.$primary-color;
+  background-color: variables.$element-background;
   height: 35px;
 
    @include mix.hoverScale();
