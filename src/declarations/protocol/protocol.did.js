@@ -11,6 +11,7 @@ export const idlFactory = ({ IDL }) => {
     'init' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'liquidatePosition' : IDL.Func([IDL.Nat], [Result], []),
     'setCollateralPrice' : IDL.Func([IDL.Nat], [], []),
+    'updatePosition' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [Result], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

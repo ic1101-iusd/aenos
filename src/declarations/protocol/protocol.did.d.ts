@@ -14,4 +14,5 @@ export interface _SERVICE {
   'init' : ActorMethod<[string, string], undefined>,
   'liquidatePosition' : ActorMethod<[bigint], Result>,
   'setCollateralPrice' : ActorMethod<[bigint], undefined>,
+  'updatePosition' : ActorMethod<[bigint, bigint, bigint], Result>,
 }

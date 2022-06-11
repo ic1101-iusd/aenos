@@ -97,7 +97,9 @@ actor Minter {
 
   public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<(), ProtocolError> {
     // Check if stable is overcollaterized enough
-    assert stableAmount * (100 + minRisk) / 100 <= collateralAmount * collateralPrice / (10**priceDecimals);
+    if (stableAmount * (100 + minRisk) / 100 > collateralAmount * collateralPrice / (10**priceDecimals)) {
+      throw Error.reject("Position should be overcollaterized."); 
+    };
     let newPosition: P.Position = P.Position(lastPositionId, msg.caller, collateralAmount, stableAmount);
     
     switch (collateralActor) {
@@ -133,13 +135,15 @@ actor Minter {
     if (p.deleted) {
       throw Error.reject("The position already closed or closing."); 
     };
+    if (p.updating) {
+      throw Error.reject("The position is being updated."); 
+    };
     if (p.owner != msg.caller) {
       throw Error.reject("It is not your position."); 
     };
 
     await processClosePosition(p, msg.caller)
   };
-
 
   // There is some copy-past because motoko has strage await behaivior for inner calls.
   // TODO make code style research
@@ -154,6 +158,9 @@ actor Minter {
     };
     if (p.deleted) {
       throw Error.reject("The position already closed or closing."); 
+    };
+    if (p.updating) {
+      throw Error.reject("The position is being updated."); 
     };
     if (p.stableAmount * (100 + minRisk) / 100 <= p.collateralAmount * collateralPrice / (10**priceDecimals)) {
       throw Error.reject("Position is fine, no liquidation required."); 
@@ -184,5 +191,83 @@ actor Minter {
     #ok(())
   };
 
+  public shared(msg) func updatePosition(id: Nat, newCollateralAmount: Nat, newStableAmount: Nat) : async Result.Result<(), ProtocolError> {
+    let p = switch(positionMap.get(id)) {
+      case null {
+        throw Error.reject("No position found."); 
+      };
+      case (?position) {
+        position
+      };
+    };
+    if (p.deleted) {
+      throw Error.reject("The position already closed or closing."); 
+    };
+    if (newStableAmount * (100 + minRisk) / 100 > newCollateralAmount * collateralPrice / (10**priceDecimals)) {
+      throw Error.reject("The position should be overcollaterized."); 
+    };
+    if (p.updating) {
+      throw Error.reject("The position is being updated."); 
+    };
 
+    var newPosition = P.Position(
+      p.id,
+      p.owner,
+      p.collateralAmount,
+      p.stableAmount
+    );
+    // Setup updating flag
+    newPosition.updating := true;
+    positionMap.put(newPosition.id, newPosition);
+
+    
+    let self = Principal.fromActor(Minter);
+    // Re-transfer token in secure way
+    let _ = do ? {
+      // Firstly transfer tokens from user if needed
+      if (p.stableAmount > newStableAmount) {
+        let stableDiff = p.stableAmount - newStableAmount;
+        let result = await usbActor!.transferFrom(msg.caller, self, stableDiff);
+        switch(result) {
+            case (#Err(_)) { 
+              newPosition.updating := false;
+              positionMap.put(newPosition.id, newPosition);
+              return #err(#transferFromError);
+            };
+            case (#Ok(_)) {
+              let _ = usbActor!.burn(stableDiff);
+              newPosition.stableAmount := newStableAmount;
+              positionMap.put(newPosition.id, newPosition);
+            };
+          };
+      };
+      if (p.collateralAmount < newCollateralAmount) {
+        let result = await collateralActor!.transferFrom(msg.caller, self, newCollateralAmount - p.collateralAmount);
+        switch(result) {
+            case (#Err(_)) { 
+              newPosition.updating := false;
+              positionMap.put(newPosition.id, newPosition);
+              return #err(#transferFromError);
+            };
+            case (#Ok(_)) {
+              newPosition.collateralAmount := newCollateralAmount;
+            };
+          };
+      };
+
+      // Secondly send tokens to user if needed
+      // No await required, consider these calls coudn't fail
+      if (p.stableAmount < newStableAmount) {
+        let _ = usbActor!.mint(msg.caller, newStableAmount - p.stableAmount);
+        newPosition.stableAmount := newStableAmount;
+      };
+      if (p.collateralAmount > newCollateralAmount) {
+        let _ = collateralActor!.transfer(msg.caller, p.collateralAmount - newCollateralAmount);
+        newPosition.collateralAmount := newCollateralAmount;
+      };
+      newPosition.updating := false;
+      positionMap.put(newPosition.id, newPosition);
+    };
+    #ok(())
+  };
 };

@@ -16,6 +16,7 @@ module {
         public var collateralAmount = collateralAmountInit;
         public var stableAmount = stableAmountInit;
         public var deleted = false;
+        public var updating = false;
         
         public func getId(): Nat {
             id
