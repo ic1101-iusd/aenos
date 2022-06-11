@@ -95,6 +95,36 @@ actor Minter {
     }
   };
 
+  public query func getPositions(limit: Nat, offset: Nat): async [P.SharedPosition] {
+    if(offset > lastPositionId or offset < 0) {
+        throw Error.reject("Wrong offset");
+    };
+    if(limit < 0) {
+        throw Error.reject("Wrong limit");
+    };
+    var positions:[P.SharedPosition]=[];
+    var start: Nat = offset;
+    var end: Nat = offset+limit;
+    if(end > lastPositionId) {
+       end := lastPositionId;
+    };
+    if(end > 200) {
+       end := offset + 200;
+    };
+    while(start <= end) {
+        switch(positionMap.get(start)) {
+          case null {
+            throw Error.reject("No position found.");
+          };
+          case (?position) {
+            positions:=Array.append<P.SharedPosition>([P.SharedPosition(position)],  positions);
+            start+=1;
+          };
+        };
+    };
+    positions
+  };
+
   public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<(), ProtocolError> {
     // Check if stable is overcollaterized enough
     assert stableAmount * (100 + minRisk) / 100 <= collateralAmount * collateralPrice / (10**priceDecimals);
