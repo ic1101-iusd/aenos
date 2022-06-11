@@ -1,7 +1,19 @@
+@use './variables';
+
 @mixin hoverScale {
   transition: transform 0.3s;
 
   &:hover {
     transform: scale(1.03);
   }
+}
+
+@mixin card {
+  border-radius: 25px;
+  background-color: variables.$background-secondary-color;
+  padding: 5px 20px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }

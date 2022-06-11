@@ -2,6 +2,8 @@ import React, { useState, useCallback, useEffect } from 'react';
 
 import * as formulas from 'Utils/formulas';
 
+import PriceCard from './PriceCard';
+import PositionForm from './PositionForm';
 import styles from './Position.scss';
 
 const BTC_PRICE_MOCK = 30000;
@@ -35,9 +37,27 @@ const Position = () => {
   console.log({ colAmount, dollars })
 
   return (
-    <div>
-      <input className={styles.input} type="text" onChange={handleColAmount} />
-      <input className={styles.input} type="text" onChange={handleDollars} />
+    <div className={styles.position}>
+      <div className={styles.cards}>
+        <div className={styles.column}>
+          <PriceCard>
+            10205 WBTC
+          </PriceCard>
+          <PriceCard>
+            10205 WBTC
+          </PriceCard>
+        </div>
+        <div className={styles.column}>
+          <PriceCard>
+            10205 WBTC
+          </PriceCard>
+          <PriceCard>
+            10205 WBTC
+          </PriceCard>
+        </div>
+      </div>
+
+      <PositionForm />
     </div>
   );
 };

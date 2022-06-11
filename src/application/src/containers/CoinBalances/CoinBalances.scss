@@ -3,14 +3,9 @@
 
 .coinBalances {
   width: 250px;
-  border-radius: 25px;
-  background-color: variables.$background-secondary-color;
   margin: 20px auto;
-  padding: 5px 20px;
 
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  @include mix.card;
 }
 
 .balance {
@@ -20,7 +15,7 @@
   margin: 10px 0;
   cursor: default;
 
-  @include mix.hoverScale();
+  @include mix.hoverScale;
 }
 
 .leftGroup {

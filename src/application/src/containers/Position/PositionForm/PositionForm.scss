@@ -1,0 +1,8 @@
+@use 'Styles/mix';
+
+.positionForm {
+  @include mix.card;
+
+  width: 400px;
+  margin: 10px;
+}

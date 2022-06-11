@@ -1,0 +1,26 @@
+@use 'Styles/mix';
+
+.priceCard {
+  @include mix.card;
+
+  width: 300px;
+  margin: 10px;
+  height: 170px;
+  padding: 16px;
+}
+
+.label {
+
+}
+
+.amount {
+
+}
+
+.badge {
+
+}
+
+.children {
+
+}
