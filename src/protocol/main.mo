@@ -2,12 +2,12 @@ import Cycles "mo:base/ExperimentalCycles";
 import Nat "mo:base/Nat";
 import Option "mo:base/Option";
 import Array "mo:base/Array";
-import Buffer "mo:base/Buffer";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Prim "mo:prim";
 import P "./position";
+import B "mo:base/Buffer";
 import Error "mo:base/Error";
 import Result "mo:base/Result";
 
@@ -48,7 +48,7 @@ actor Minter {
     Nat.equal,
     func(x)   { Prim.natToNat32 x }
   );
-  let accountPositions = HashMap.HashMap<Principal, Buffer.Buffer<Nat>>(
+  let accountPositions = HashMap.HashMap<Principal, B.Buffer<Nat>>(
     0,
     Principal.equal,
     Principal.hash
@@ -106,20 +106,18 @@ actor Minter {
         throw Error.reject("Wrong offset");
     };
 
-    let start = offset;
-    var localLimit = if (limit > 200) {
-      200
-    } else {
-      limit
+    var localLimit = limit;
+    if (localLimit > 200) {
+      localLimit := 200;
     };
-    let end = if (offset + localLimit > lastPositionId) {
+    let start = offset;
+    var end = offset + localLimit;
+    if (end > lastPositionId) {
       localLimit := lastPositionId - offset;
-      lastPositionId
-    } else {
-      offset + localLimit
+      end := lastPositionId;
     };
 
-    let positionsBuffer = Buffer.Buffer<P.SharedPosition>(localLimit);
+    let positionsBuffer = B.Buffer<P.SharedPosition>(localLimit);
     for(i in Iter.range(start, end)) {
        switch(positionMap.get(i)) {
           case (?position) {
@@ -140,7 +138,7 @@ actor Minter {
         ids
       };
     };
-    let positionsBuffer = Buffer.Buffer<P.SharedPosition>(idsBuffer.size());
+    let positionsBuffer = B.Buffer<P.SharedPosition>(idsBuffer.size());
     for (pid in idsBuffer.vals()) {
       switch(positionMap.get(pid)) {
           case (?position) {
@@ -177,7 +175,7 @@ actor Minter {
     positionMap.put(newPosition.getId(), newPosition);
     let accountBuffer = switch(accountPositions.get(msg.caller)) {
       case null {
-        Buffer.Buffer<Nat>(3)
+        B.Buffer<Nat>(1)
       };
       case (?accountBuffer) {
         accountBuffer
