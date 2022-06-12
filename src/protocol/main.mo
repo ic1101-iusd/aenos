@@ -84,6 +84,10 @@ actor Minter {
       collateralPrice
   };
 
+  public query func getLastPositionId() : async Nat {
+      lastPositionId
+  };
+
   public query func getPosition(id: Nat): async ?P.SharedPosition {
     switch(positionMap.get(id)) {
       case null {
@@ -93,6 +97,36 @@ actor Minter {
         ?(P.SharedPosition(position))
       }
     }
+  };
+
+  public query func getPositions(limit: Nat, offset: Nat): async [P.SharedPosition] {
+    if(offset > lastPositionId) {
+        throw Error.reject("Wrong offset");
+    };
+    var newLimit = limit;
+    var start: Nat = offset;
+    var end: Nat = offset+newLimit;
+
+    if(limit > 200) {
+       newLimit := 200;
+       end := offset + newLimit;
+    };
+
+    if(end > lastPositionId) {
+       end := lastPositionId;
+       newLimit = lastPositionId - offset;
+    };
+
+    let positionsBuff : B.Buffer<P.SharedPosition> = B.Buffer(newLimit);
+    for(i in Iter.range(start, end)) {
+       switch(positionMap.get(i)) {
+              case (?position) {
+                positionsBuff.add(P.SharedPosition(position));
+              };
+              case null{};
+       };
+    };
+    positionsBuff.toArray();
   };
 
   public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<(), ProtocolError> {
