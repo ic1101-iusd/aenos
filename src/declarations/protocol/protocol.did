@@ -9,7 +9,9 @@ service : {
   closePosition: (nat) -> (Result);
   createPosition: (nat, nat) -> (Result);
   getCollateralPrice: () -> (nat) query;
+  getLastPositionId: () -> (nat) query;
   getPosition: (nat) -> (opt SharedPosition) query;
+  getPositions: (nat, nat) -> (vec SharedPosition) query;
   getTokenPrincipal: () -> (principal) query;
   init: (text, text) -> ();
   liquidatePosition: (nat) -> (Result);

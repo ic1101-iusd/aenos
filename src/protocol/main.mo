@@ -2,6 +2,8 @@ import Cycles "mo:base/ExperimentalCycles";
 import Nat "mo:base/Nat";
 import Option "mo:base/Option";
 import Array "mo:base/Array";
+import Buffer "mo:base/Buffer";
+import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Prim "mo:prim";
@@ -103,30 +105,30 @@ actor Minter {
     if(offset > lastPositionId) {
         throw Error.reject("Wrong offset");
     };
-    var newLimit = limit;
-    var start: Nat = offset;
-    var end: Nat = offset+newLimit;
 
-    if(limit > 200) {
-       newLimit := 200;
-       end := offset + newLimit;
+    let start = offset;
+    var localLimit = if (limit > 200) {
+      200
+    } else {
+      limit
+    };
+    let end = if (offset + localLimit > lastPositionId) {
+      localLimit := lastPositionId - offset;
+      lastPositionId
+    } else {
+      offset + localLimit
     };
 
-    if(end > lastPositionId) {
-       end := lastPositionId;
-       newLimit = lastPositionId - offset;
-    };
-
-    let positionsBuff : B.Buffer<P.SharedPosition> = B.Buffer(newLimit);
+    let positionsBuff = Buffer.Buffer<P.SharedPosition>(localLimit);
     for(i in Iter.range(start, end)) {
        switch(positionMap.get(i)) {
-              case (?position) {
-                positionsBuff.add(P.SharedPosition(position));
-              };
-              case null{};
+          case (?position) {
+            positionsBuff.add(P.SharedPosition(position));
+          };
+          case null{};
        };
     };
-    positionsBuff.toArray();
+    positionsBuff.toArray()
   };
 
   public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<(), ProtocolError> {
