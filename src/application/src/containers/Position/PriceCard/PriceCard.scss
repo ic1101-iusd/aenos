@@ -1,25 +1,36 @@
 @use 'Styles/mix';
+@use 'Styles/variables';
 
 .priceCard {
   @include mix.card;
 
   width: 300px;
   margin: 10px;
-  height: 175px;
+  height: 180px;
 }
 
 .label {
-
+  @include mix.title;
+  margin-bottom: 10px;
 }
 
 .amount {
-
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .badge {
-
+  font-size: 0.9rem;
+  background-color: variables.$element-background;
+  height: 25px;
+  border-radius: 20px;
+  width: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .children {
-
+  font-weight: bold;
 }

@@ -42,14 +42,12 @@ const Position = () => {
         <div className={styles.column}>
           <PriceCard
             label="Liquidation Price"
-          >
-            10205 WBTC
-          </PriceCard>
+            amount={20000}
+            afterAmount={25000}
+          />
           <PriceCard
             label="Current Price"
-          >
-            10205 WBTC
-          </PriceCard>
+          />
         </div>
         <div className={styles.column}>
           <PriceCard
