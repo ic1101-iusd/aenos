@@ -103,24 +103,28 @@ actor Minter {
     if(offset > lastPositionId) {
         throw Error.reject("Wrong offset");
     };
+    var newLimit = limit;
     var start: Nat = offset;
-    var end: Nat = offset+limit;
+    var end: Nat = offset+newLimit;
+
+    if(limit > 200) {
+       newLimit := 200;
+       end := offset + newLimit;
+    };
+
     if(end > lastPositionId) {
        end := lastPositionId;
+       newLimit = lastPositionId - offset;
     };
-    if(limit > 200) {
-       end := offset + 200;
-    };
-    let positionsBuff : B.Buffer<P.SharedPosition> = B.Buffer(limit);
+
+    let positionsBuff : B.Buffer<P.SharedPosition> = B.Buffer(newLimit);
     for(i in Iter.range(start, end)) {
-        switch(positionMap.get(i)) {
-          case null {
-            throw Error.reject("No position found");
-          };
-          case (?position) {
-            positionsBuff.add(P.SharedPosition(position));
-          };
-        };
+       switch(positionMap.get(i)) {
+              case (?position) {
+                positionsBuff.add(P.SharedPosition(position));
+              };
+              case null{};
+       };
     };
     positionsBuff.toArray();
   };
