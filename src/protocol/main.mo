@@ -112,14 +112,13 @@ actor Minter {
        end := offset + 200;
     };
     let positionsBuff : B.Buffer<P.SharedPosition> = B.Buffer(limit);
-    while(start <= end) {
-        switch(positionMap.get(start)) {
+    for(i in Iter.range(start, end)) {
+        switch(positionMap.get(i)) {
           case null {
-            throw Error.reject("No position found.");
+            throw Error.reject("No position found");
           };
           case (?position) {
             positionsBuff.add(P.SharedPosition(position));
-            start+=1;
           };
         };
     };
