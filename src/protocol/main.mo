@@ -2,10 +2,12 @@ import Cycles "mo:base/ExperimentalCycles";
 import Nat "mo:base/Nat";
 import Option "mo:base/Option";
 import Array "mo:base/Array";
+import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Prim "mo:prim";
 import P "./position";
+import B "mo:base/Buffer";
 import Error "mo:base/Error";
 import Result "mo:base/Result";
 
@@ -46,7 +48,7 @@ actor Minter {
     Nat.equal,
     func(x)   { Prim.natToNat32 x }
   );
-  let accountPositions = HashMap.HashMap<Principal, [Nat]>(
+  let accountPositions = HashMap.HashMap<Principal, B.Buffer<Nat>>(
     0,
     Principal.equal,
     Principal.hash
@@ -103,30 +105,52 @@ actor Minter {
     if(offset > lastPositionId) {
         throw Error.reject("Wrong offset");
     };
-    var newLimit = limit;
-    var start: Nat = offset;
-    var end: Nat = offset+newLimit;
 
-    if(limit > 200) {
-       newLimit := 200;
-       end := offset + newLimit;
+    var localLimit = limit;
+    let start = offset;
+    var end = offset + localLimit;
+
+    if (localLimit > 200) {
+      localLimit := 200;
+    };
+    if (end > lastPositionId) {
+      localLimit := lastPositionId - offset;
+      end := lastPositionId;
     };
 
-    if(end > lastPositionId) {
-       end := lastPositionId;
-       newLimit = lastPositionId - offset;
-    };
-
-    let positionsBuff : B.Buffer<P.SharedPosition> = B.Buffer(newLimit);
+    let positionsBuffer = B.Buffer<P.SharedPosition>(localLimit);
     for(i in Iter.range(start, end)) {
        switch(positionMap.get(i)) {
-              case (?position) {
-                positionsBuff.add(P.SharedPosition(position));
-              };
-              case null{};
+          case (?position) {
+            positionsBuffer.add(P.SharedPosition(position));
+          };
+          case null {};
        };
     };
-    positionsBuff.toArray();
+    positionsBuffer.toArray()
+  };
+
+  public query func getAccountPositions(account: Principal): async [P.SharedPosition] {
+    let idsBuffer = switch(accountPositions.get(account)) {
+      case null {
+        return [];
+      };
+      case (?ids) {
+        ids
+      };
+    };
+    let positionsBuffer = B.Buffer<P.SharedPosition>(idsBuffer.size());
+    for (pid in idsBuffer.vals()) {
+      switch(positionMap.get(pid)) {
+          case (?position) {
+            positionsBuffer.add(P.SharedPosition(position));
+          };
+          case null {
+            throw Error.reject("WTF? Some position not found.");
+          };
+       };
+    };
+    positionsBuffer.toArray()
   };
 
   public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<(), ProtocolError> {
@@ -150,6 +174,16 @@ actor Minter {
       };
     };
     positionMap.put(newPosition.getId(), newPosition);
+    let accountBuffer = switch(accountPositions.get(msg.caller)) {
+      case null {
+        B.Buffer<Nat>(1)
+      };
+      case (?accountBuffer) {
+        accountBuffer
+      };
+    };
+    accountBuffer.add(newPosition.getId());
+    accountPositions.put(msg.caller, accountBuffer);
      // Just need to assign it for some reason =/
     let _ = do ? {
       usbActor!.mint(msg.caller, stableAmount)

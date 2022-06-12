@@ -5,8 +5,19 @@ export const idlFactory = ({ IDL }) => {
   return IDL.Service({
     'closePosition' : IDL.Func([IDL.Nat], [Result], []),
     'createPosition' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
+    'getAccountPositions' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Vec(SharedPosition)],
+        ['query'],
+      ),
     'getCollateralPrice' : IDL.Func([], [IDL.Nat], ['query']),
+    'getLastPositionId' : IDL.Func([], [IDL.Nat], ['query']),
     'getPosition' : IDL.Func([IDL.Nat], [IDL.Opt(SharedPosition)], ['query']),
+    'getPositions' : IDL.Func(
+        [IDL.Nat, IDL.Nat],
+        [IDL.Vec(SharedPosition)],
+        ['query'],
+      ),
     'getTokenPrincipal' : IDL.Func([], [IDL.Principal], ['query']),
     'init' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'liquidatePosition' : IDL.Func([IDL.Nat], [Result], []),
