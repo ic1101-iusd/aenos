@@ -84,6 +84,10 @@ actor Minter {
       collateralPrice
   };
 
+  public query func getLastPositionId() : async Nat {
+      lastPositionId
+  };
+
   public query func getPosition(id: Nat): async ?P.SharedPosition {
     switch(positionMap.get(id)) {
       case null {
