@@ -99,7 +99,6 @@ actor Minter {
     if(offset > lastPositionId) {
         throw Error.reject("Wrong offset");
     };
-    var positions:[P.SharedPosition]=[];
     var start: Nat = offset;
     var end: Nat = offset+limit;
     if(end > lastPositionId) {
