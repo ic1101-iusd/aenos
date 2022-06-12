@@ -48,7 +48,7 @@ actor Minter {
     Nat.equal,
     func(x)   { Prim.natToNat32 x }
   );
-  let accountPositions = HashMap.HashMap<Principal, [Nat]>(
+  let accountPositions = HashMap.HashMap<Principal, Buffer.Buffer<Nat>>(
     0,
     Principal.equal,
     Principal.hash
@@ -119,16 +119,39 @@ actor Minter {
       offset + localLimit
     };
 
-    let positionsBuff = Buffer.Buffer<P.SharedPosition>(localLimit);
+    let positionsBuffer = Buffer.Buffer<P.SharedPosition>(localLimit);
     for(i in Iter.range(start, end)) {
        switch(positionMap.get(i)) {
           case (?position) {
-            positionsBuff.add(P.SharedPosition(position));
+            positionsBuffer.add(P.SharedPosition(position));
           };
-          case null{};
+          case null {};
        };
     };
-    positionsBuff.toArray()
+    positionsBuffer.toArray()
+  };
+
+  public query func getAccountPositions(account: Principal): async [P.SharedPosition] {
+    let idsBuffer = switch(accountPositions.get(account)) {
+      case null {
+        return [];
+      };
+      case (?ids) {
+        ids
+      };
+    };
+    let positionsBuffer = Buffer.Buffer<P.SharedPosition>(idsBuffer.size());
+    for (pid in idsBuffer.vals()) {
+      switch(positionMap.get(pid)) {
+          case (?position) {
+            positionsBuffer.add(P.SharedPosition(position));
+          };
+          case null {
+            throw Error.reject("WTF? Some position not found.");
+          };
+       };
+    };
+    positionsBuffer.toArray()
   };
 
   public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<(), ProtocolError> {
@@ -152,6 +175,16 @@ actor Minter {
       };
     };
     positionMap.put(newPosition.getId(), newPosition);
+    let accountBuffer = switch(accountPositions.get(msg.caller)) {
+      case null {
+        Buffer.Buffer<Nat>(3)
+      };
+      case (?accountBuffer) {
+        accountBuffer
+      };
+    };
+    accountBuffer.add(newPosition.getId());
+    accountPositions.put(msg.caller, accountBuffer);
      // Just need to assign it for some reason =/
     let _ = do ? {
       usbActor!.mint(msg.caller, stableAmount)

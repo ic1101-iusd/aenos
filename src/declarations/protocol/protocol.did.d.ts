@@ -8,6 +8,7 @@ export type SharedPosition = {};
 export interface _SERVICE {
   'closePosition' : ActorMethod<[bigint], Result>,
   'createPosition' : ActorMethod<[bigint, bigint], Result>,
+  'getAccountPositions' : ActorMethod<[Principal], Array<SharedPosition>>,
   'getCollateralPrice' : ActorMethod<[], bigint>,
   'getLastPositionId' : ActorMethod<[], bigint>,
   'getPosition' : ActorMethod<[bigint], [] | [SharedPosition]>,

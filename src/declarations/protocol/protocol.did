@@ -8,6 +8,7 @@ type ProtocolError = variant {transferFromError;};
 service : {
   closePosition: (nat) -> (Result);
   createPosition: (nat, nat) -> (Result);
+  getAccountPositions: (principal) -> (vec SharedPosition) query;
   getCollateralPrice: () -> (nat) query;
   getLastPositionId: () -> (nat) query;
   getPosition: (nat) -> (opt SharedPosition) query;
