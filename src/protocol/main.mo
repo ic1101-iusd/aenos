@@ -96,11 +96,9 @@ actor Minter {
   };
 
   public query func getPositions(limit: Nat, offset: Nat): async [P.SharedPosition] {
-
     if(offset > lastPositionId) {
         throw Error.reject("Wrong offset");
     };
-
     var positions:[P.SharedPosition]=[];
     var start: Nat = offset;
     var end: Nat = offset+limit;
