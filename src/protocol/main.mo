@@ -107,11 +107,12 @@ actor Minter {
     };
 
     var localLimit = limit;
+    let start = offset;
+    var end = offset + localLimit;
+
     if (localLimit > 200) {
       localLimit := 200;
     };
-    let start = offset;
-    var end = offset + localLimit;
     if (end > lastPositionId) {
       localLimit := lastPositionId - offset;
       end := lastPositionId;
