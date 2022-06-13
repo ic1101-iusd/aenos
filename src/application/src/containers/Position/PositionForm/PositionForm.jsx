@@ -1,16 +1,34 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import Slider from 'rc-slider';
 
 import Input from 'Components/Input';
 import Button from 'Components/Button';
 import { useCoins } from 'Services/coins';
+import { formatDollars, formatPercent } from 'Utils/formatters';
 import styleVars from 'Styles/variables.scss';
 
 import styles from './PositionForm.scss';
 
-const PositionForm = () => {
+const ONE_MILLION = 10**6;
+
+const PositionForm = ({
+  collateralAmount,
+  setCollateralAmount,
+  collateralRatio,
+  setCollateralRatio,
+  liquidationPrice,
+  currentPrice,
+  availableDollars,
+}) => {
+  const collateralInputRef = useRef();
   const { coins } = useCoins();
   const bitcoin = coins[0];
+
+  const handleBalanceClick = useCallback(() => {
+    setCollateralAmount(bitcoin.balance);
+    console.log(collateralInputRef.current);
+    collateralInputRef.current.value = bitcoin.balance;
+  }, [bitcoin]);
 
   return (
     <div className={styles.positionForm}>
@@ -30,16 +48,23 @@ const PositionForm = () => {
             Deposit BTC
           </div>
 
-          <div className={styles.balance}>
+          <div
+            className={styles.balance}
+            onClick={handleBalanceClick}
+          >
             {bitcoin.balance} BTC
           </div>
         </div>
         <Input
           className={styles.input}
+          onChange={setCollateralAmount}
+          placeholder="0.00"
+          max={ONE_MILLION}
           type="number"
+          ref={collateralInputRef}
         />
         <div className={styles.usdAmount}>
-          ~${30000}
+          ~{formatDollars(currentPrice)}
         </div>
       </div>
 
@@ -51,7 +76,7 @@ const PositionForm = () => {
               Liquidation Price
             </div>
             <div className={styles.amount}>
-              {25000}
+              {formatDollars(liquidationPrice)}
             </div>
           </div>
 
@@ -60,20 +85,21 @@ const PositionForm = () => {
               Collateral Ratio
             </div>
             <div className={styles.amount}>
-              150%
+              {formatPercent(collateralRatio)}
             </div>
           </div>
         </div>
 
         <Slider
+          className={styles.sliderHandler}
           min={1}
           max={3}
           reverse
           step={0.01}
-          defaultValue={3}
-          onChange={(nextValues) => {
-            console.log('Change:', nextValues);
-          }}
+          value={collateralRatio}
+          defaultValue={collateralRatio}
+          onChange={setCollateralRatio}
+          disabled={!collateralAmount}
           railStyle={{
             backgroundColor: styleVars.primaryColor,
           }}
@@ -90,12 +116,11 @@ const PositionForm = () => {
             Highest Risk
           </div>
         </div>
+
       </div>
 
-      <Button
-        className={styles.button}
-      >
-        Generate 1000 DAS
+      <Button>
+        Generate {availableDollars.toFixed(2)} USB
       </Button>
     </div>
   );

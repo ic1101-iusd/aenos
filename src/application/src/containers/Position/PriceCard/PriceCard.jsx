@@ -2,7 +2,7 @@ import React from 'react';
 
 import styles from './PriceCard.scss';
 
-const PriceCard = ({ label, amount, afterAmount, children }) => {
+const PriceCard = ({ label, amount, afterAmount, children, formatter = (val) => val }) => {
   return (
     <div className={styles.priceCard}>
       <div>
@@ -10,13 +10,13 @@ const PriceCard = ({ label, amount, afterAmount, children }) => {
           {label}
         </div>
         <div className={styles.amount}>
-          {amount}
+          {formatter(amount)}
         </div>
-        {afterAmount && (
+        {afterAmount ? (
           <div className={styles.badge}>
-            {afterAmount} after
+            {formatter(afterAmount)} after
           </div>
-        )}
+        ) : null}
       </div>
 
       {children && (

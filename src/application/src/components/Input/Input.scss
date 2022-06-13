@@ -6,6 +6,11 @@
   border-bottom: 2px solid variables.$primary-color;
   font-size: 2rem;
 
+  &::placeholder {
+    color: variables.$text-color;
+    opacity: 0.4;
+  }
+
   &:focus {
     outline: none;
   }

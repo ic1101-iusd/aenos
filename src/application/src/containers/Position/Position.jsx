@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 
-import * as formulas from 'Utils/formulas';
+import formulas from 'Utils/formulas';
+import { formatDollars } from 'Utils/formatters';
 
 import PriceCard from './PriceCard';
 import PositionForm from './PositionForm';
@@ -8,33 +9,52 @@ import styles from './Position.scss';
 
 const BTC_PRICE_MOCK = 30000;
 
+const getStats = ({ collateralRatio, collateralAmount, currentPrice, prevCollateralLocked }) => {
+  const collateralLocked = collateralAmount + prevCollateralLocked;
+
+  formulas.collateralRatio = collateralRatio;
+  formulas.collateralPrice = currentPrice;
+  formulas.collateralAmount = collateralAmount;
+  const liquidationPrice = formulas.getLiquidationPrice();
+  const buyingPower = Math.round(formulas.getBuyingPower(collateralAmount));
+  const availableDollars = formulas.getAvailableDollars(collateralAmount);
+
+  return {
+    liquidationPrice,
+    buyingPower,
+    availableDollars,
+    collateralLocked,
+    collateralLockedUsd: collateralLocked * currentPrice,
+  };
+};
+
 const Position = () => {
-  const [colAmount, setColAmount] = useState(0);
-  const [dollars, setDollars] = useState(0);
+  const [collateralAmount, setCollateralAmount] = useState(0);
+  // default 300% (low risk)
+  const [collateralRatio, setCollateralRatio] = useState(3);
 
-  const handleColAmount = useCallback((e) => {
-    console.log(e);
-    setColAmount(Number(e.target.value));
+  const currentPrice = BTC_PRICE_MOCK;
+
+  const stats = useMemo(() => {
+    return {
+      liquidationPrice: 0,
+      buyingPower: 0,
+      availableDollars: 0,
+      collateralLocked: 0,
+      collateralLockedUsd: 0,
+    };
   }, []);
-  const handleDollars = useCallback((e) => {
-    setDollars(e.target.value);
-  });
 
-  useEffect(() => {
-    const liquidationRatio = formulas.getLiquidationRation(colAmount, BTC_PRICE_MOCK, dollars);
-    const liquidationPrice = formulas.getLiquidationPrice(colAmount, dollars);
-    const buyingPower = Math.round(formulas.getBuyingPower(colAmount, BTC_PRICE_MOCK));
-    const avDollars = formulas.getAvailableDollars(colAmount, BTC_PRICE_MOCK);
-
-    console.log({
-      liquidationRatio,
-      liquidationPrice,
-      buyingPower,
-      avDollars,
+  const nextStats = useMemo(() => {
+    return getStats({
+      collateralAmount,
+      collateralRatio,
+      currentPrice,
+      prevCollateralLocked: stats.collateralLocked,
     });
-  }, [colAmount, dollars]);
+  }, [collateralAmount, collateralRatio, currentPrice, stats.collateralLocked]);
 
-  console.log({ colAmount, dollars })
+  console.log({nextStats});
 
   return (
     <div className={styles.position}>
@@ -42,28 +62,45 @@ const Position = () => {
         <div className={styles.column}>
           <PriceCard
             label="Liquidation Price"
-            amount={20000}
-            afterAmount={25000}
+            formatter={formatDollars}
+            amount={stats.liquidationPrice}
+            afterAmount={nextStats.liquidationPrice}
           />
           <PriceCard
             label="Current Price"
+            formatter={formatDollars}
+            amount={currentPrice}
           />
         </div>
         <div className={styles.column}>
           <PriceCard
             label="Buying Power"
+            formatter={formatDollars}
+            amount={stats.buyingPower}
+            afterAmount={nextStats.buyingPower}
           >
-            10205 WBTC
+            {(stats.buyingPower / currentPrice).toFixed(8)} WBTC
           </PriceCard>
           <PriceCard
             label="Collateral Locked"
+            formatter={formatDollars}
+            amount={stats.collateralLockedUsd}
+            afterAmount={nextStats.collateralLockedUsd}
           >
-            10205 WBTC
+            {stats.collateralLocked} WBTC
           </PriceCard>
         </div>
       </div>
 
-      <PositionForm />
+      <PositionForm
+        collateralAmount={collateralAmount}
+        setCollateralAmount={setCollateralAmount}
+        collateralRatio={collateralRatio}
+        setCollateralRatio={setCollateralRatio}
+        currentPrice={currentPrice}
+        liquidationPrice={nextStats.liquidationPrice}
+        availableDollars={nextStats.availableDollars}
+      />
     </div>
   );
 };

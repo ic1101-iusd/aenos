@@ -59,6 +59,11 @@
 }
 
 .slider {
+
+  .sliderHandler {
+    background-color: variables.$background-secondary-color;
+  }
+
   .sliderInfo {
     display: flex;
     flex-direction: row;

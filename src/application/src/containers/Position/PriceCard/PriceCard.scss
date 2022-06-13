@@ -25,7 +25,8 @@
   background-color: variables.$element-background;
   height: 25px;
   border-radius: 20px;
-  width: 100px;
+  width: fit-content;
+  padding: 0 7px;
   display: flex;
   justify-content: center;
   align-items: center;
