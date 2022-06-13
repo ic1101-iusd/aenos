@@ -7,12 +7,6 @@ const formulas = {
   collateralAmount: 0,
 
   getAvailableDollars(collateralAmount) {
-    console.log({
-      collateralAmount: this.collateralAmount,
-      price: this.collateralPrice,
-      index: this.collateralIndex,
-      ratio: this.collateralRatio,
-    })
     return (collateralAmount * this.collateralPrice) / (this.collateralIndex * this.collateralRatio) || 0;
   },
   // return health factor (< 1 = liquidation)
@@ -25,7 +19,6 @@ const formulas = {
   getBuyingPower(collateralAmount) {
     const avDollars = this.getAvailableDollars(collateralAmount);
 
-    console.log({ avDollars})
     if (avDollars < 0.1) {
       return avDollars;
     }

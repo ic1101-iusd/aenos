@@ -54,8 +54,6 @@ const Position = () => {
     });
   }, [collateralAmount, collateralRatio, currentPrice, stats.collateralLocked]);
 
-  console.log({nextStats});
-
   return (
     <div className={styles.position}>
       <div className={styles.cards}>

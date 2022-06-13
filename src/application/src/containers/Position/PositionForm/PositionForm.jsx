@@ -26,7 +26,6 @@ const PositionForm = ({
 
   const handleBalanceClick = useCallback(() => {
     setCollateralAmount(bitcoin.balance);
-    console.log(collateralInputRef.current);
     collateralInputRef.current.value = bitcoin.balance;
   }, [bitcoin]);
 
