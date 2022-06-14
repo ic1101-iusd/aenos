@@ -5,17 +5,18 @@ type Result =
    ok;
  };
 type ProtocolError = variant {transferFromError;};
-service : {
-  closePosition: (nat) -> (Result);
-  createPosition: (nat, nat) -> (Result);
-  getAccountPositions: (principal) -> (vec SharedPosition) query;
-  getCollateralPrice: () -> (nat) query;
-  getLastPositionId: () -> (nat) query;
-  getPosition: (nat) -> (opt SharedPosition) query;
-  getPositions: (nat, nat) -> (vec SharedPosition) query;
-  getTokenPrincipal: () -> (principal) query;
-  init: (text, text) -> ();
-  liquidatePosition: (nat) -> (Result);
-  setCollateralPrice: (nat) -> ();
-  updatePosition: (nat, nat, nat) -> (Result);
-}
+type Minter = 
+ service {
+   closePosition: (nat) -> (Result);
+   createPosition: (nat, nat) -> (Result);
+   getAccountPositions: (principal) -> (vec SharedPosition) query;
+   getCollateralPrice: () -> (nat) query;
+   getLastPositionId: () -> (nat) query;
+   getPosition: (nat) -> (opt SharedPosition) query;
+   getPositions: (nat, nat) -> (vec SharedPosition) query;
+   getTokenPrincipal: () -> (principal) query;
+   liquidatePosition: (nat) -> (Result);
+   setCollateralPrice: (nat) -> ();
+   updatePosition: (nat, nat, nat) -> (Result);
+ };
+service : (text, text) -> Minter
