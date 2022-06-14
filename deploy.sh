@@ -15,7 +15,7 @@ case $1 in
     ;;
 esac
 
-# dfx build $NETWORK
+dfx build $NETWORK
 echo "Building finished."
 SELF_PRINCIPAL=$(dfx identity get-principal)
 MINT_TOKEN_PRINCIPAL=$(dfx canister $NETWORK info mint_token| head -n 1 | awk -F ' ' '{print $2}')
