@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 
-import { mint_token } from 'Declarations/mint_token';
-import { fake_btc } from 'Declarations/fake_btc';
-import { useWallet } from 'Services/wallet';
+import { canisterId as aisCanisterId, idlFactory as aisIdl } from 'Declarations/mint_token';
+import { canisterId as btcCanisterId, idlFactory as btcIdl } from 'Declarations/fake_btc';
 
 import useTokenData from './useTokenData';
 import CoinsContext from './CoinsContext';
@@ -10,11 +9,13 @@ import CoinsContext from './CoinsContext';
 const defaultCoins = [
   {
     id: 1,
-    canister: fake_btc,
+    canisterId: btcCanisterId,
+    idl: btcIdl,
   },
   {
     id: 2,
-    canister: mint_token,
+    canisterId: aisCanisterId,
+    idl: aisIdl,
   },
 ];
 
@@ -22,12 +23,9 @@ const CoinsProvider = ({ children }) => {
   const [coins, setCoins] = useState(defaultCoins);
   // todo: check in mainnet working and maybe add loading
 
-  const { principle } = useWallet();
-
   const { fetchTokenData } = useTokenData({
     coins,
     setCoins,
-    principle,
   });
 
   const value = useMemo(() => {

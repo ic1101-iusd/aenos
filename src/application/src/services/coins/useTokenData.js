@@ -1,30 +1,40 @@
 import { useEffect, useCallback } from 'react';
-import logger from 'Utils/logger';
 import memoize from 'memoizee';
 
-const getMetadata = memoize((coin) => {
-  return coin.canister.getMetadata();
+import { useWallet } from 'Services/wallet';
+import logger from 'Utils/logger';
+
+const getMetadata = memoize((actor, coin) => {
+  return actor.getMetadata();
 }, {
-  normalizer: function([coin]) {
+  normalizer: function([actor, coin]) {
     return coin.id;
   }
 });
 
-const useTokenData = ({ coins, setCoins, principle }) => {
+const useTokenData = ({ coins, setCoins }) => {
+  const { principle, plug } = useWallet();
+
   const fetchTokenData = useCallback(async (principle) => {
     try {
       const mergedCoins = [];
 
       for (let i = 0; i < coins.length; i++) {
-        const metaData = await getMetadata(coins[i]);
+        const actor = await plug.current.createActor({
+          canisterId: coins[i].canisterId,
+          interfaceFactory: coins[i].idl,
+        });
+
+        const metaData = await getMetadata(actor, coins[i]);
         let balance = null;
 
         if (principle) {
-          const balanceBigInt = await coins[i].canister.balanceOf(principle);
+          const balanceBigInt = await actor.balanceOf(principle);
           balance = Number(balanceBigInt) / Math.pow(10, metaData.decimals);
         }
 
         mergedCoins[i] = {
+          actor,
           ...coins[i],
           ...metaData,
           balance: balance ?? '-',
@@ -38,7 +48,9 @@ const useTokenData = ({ coins, setCoins, principle }) => {
   }, [coins, principle]);
 
   useEffect(() => {
-    fetchTokenData(principle);
+    if (principle) {
+      fetchTokenData(principle);
+    }
   }, [principle]);
 
   return {

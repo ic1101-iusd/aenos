@@ -1,9 +1,6 @@
 {
   "canisters": {
     "application": {
-      "dependencies": [
-        "protocol"
-      ],
       "frontend": {
         "entrypoint": "src/application/src/index.html"
       },

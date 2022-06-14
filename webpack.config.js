@@ -139,7 +139,6 @@ module.exports = {
       Buffer: [require.resolve("buffer/"), "Buffer"],
       process: require.resolve("process/browser"),
     }),
-    new Dotenv(),
   ],
   // proxy /api to port 8000 during development
   devServer: {

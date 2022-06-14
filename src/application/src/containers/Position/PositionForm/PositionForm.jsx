@@ -19,6 +19,7 @@ const PositionForm = ({
   liquidationPrice,
   currentPrice,
   availableDollars,
+  onSubmit,
 }) => {
   const collateralInputRef = useRef();
   const { coins } = useCoins();
@@ -118,7 +119,7 @@ const PositionForm = ({
 
       </div>
 
-      <Button>
+      <Button onClick={onSubmit}>
         Generate {availableDollars.toFixed(2)} USB
       </Button>
     </div>

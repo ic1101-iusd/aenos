@@ -1,13 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 
 import formulas from 'Utils/formulas';
 import { formatDollars } from 'Utils/formatters';
+import { useVault } from 'Services/vault';
 
 import PriceCard from './PriceCard';
 import PositionForm from './PositionForm';
 import styles from './Position.scss';
-
-const BTC_PRICE_MOCK = 30000;
 
 const getStats = ({ collateralRatio, collateralAmount, currentPrice, prevCollateralLocked }) => {
   const collateralLocked = collateralAmount + prevCollateralLocked;
@@ -32,8 +31,7 @@ const Position = () => {
   const [collateralAmount, setCollateralAmount] = useState(0);
   // default 300% (low risk)
   const [collateralRatio, setCollateralRatio] = useState(3);
-
-  const currentPrice = BTC_PRICE_MOCK;
+  const { createPosition, collateralPrice: currentPrice } = useVault();
 
   const stats = useMemo(() => {
     return {
@@ -53,6 +51,10 @@ const Position = () => {
       prevCollateralLocked: stats.collateralLocked,
     });
   }, [collateralAmount, collateralRatio, currentPrice, stats.collateralLocked]);
+
+  const handleSubmit = useCallback(() => {
+    createPosition(collateralAmount, nextStats.availableDollars);
+  }, [nextStats.availableDollars, collateralAmount]);
 
   return (
     <div className={styles.position}>
@@ -98,6 +100,7 @@ const Position = () => {
         currentPrice={currentPrice}
         liquidationPrice={nextStats.liquidationPrice}
         availableDollars={nextStats.availableDollars}
+        onSubmit={handleSubmit}
       />
     </div>
   );
