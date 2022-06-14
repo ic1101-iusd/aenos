@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e 
+set -e
 
 case $1 in
   ic)
@@ -18,9 +18,9 @@ esac
 dfx build $NETWORK
 echo "Building finished."
 SELF_PRINCIPAL=$(dfx identity get-principal)
-MINT_TOKEN_PRINCIPAL=$(dfx canister $NETWORK info mint_token| head -n 1 | awk -F ' ' '{print $2}')
-BTC_TOKEN_PRINCIPAL=$(dfx canister $NETWORK info fake_btc| head -n 1 | awk -F ' ' '{print $2}')
-PROTOCOL_PRINCIPAL=$(dfx canister $NETWORK info protocol| head -n 1 | awk -F ' ' '{print $2}')
+MINT_TOKEN_PRINCIPAL=$(dfx canister $NETWORK id mint_token)
+BTC_TOKEN_PRINCIPAL=$(dfx canister $NETWORK id fake_btc)
+PROTOCOL_PRINCIPAL=$(dfx canister $NETWORK id protocol)
 MINT_TOKEN_LOGO=$(<deploy_data/usb_logo)
 BTC_TOKEN_LOGO=$(<deploy_data/fake_btc_logo)
 echo "Variables set."
