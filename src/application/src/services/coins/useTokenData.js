@@ -48,7 +48,7 @@ const useTokenData = ({ coins, setCoins }) => {
   }, [coins, principle]);
 
   useEffect(() => {
-    if (principle) {
+    if (principle && plug.current) {
       fetchTokenData(principle);
     }
   }, [principle]);

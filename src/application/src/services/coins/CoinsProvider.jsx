@@ -32,6 +32,8 @@ const CoinsProvider = ({ children }) => {
     return {
       coins,
       fetchTokenData,
+      btc: coins[0],
+      ais: coins[1],
     };
   }, [coins]);
 
