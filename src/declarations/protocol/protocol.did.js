@@ -2,7 +2,7 @@ export const idlFactory = ({ IDL }) => {
   const ProtocolError = IDL.Variant({ 'transferFromError' : IDL.Null });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : ProtocolError });
   const SharedPosition = IDL.Record({});
-  return IDL.Service({
+  const Minter = IDL.Service({
     'closePosition' : IDL.Func([IDL.Nat], [Result], []),
     'createPosition' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
     'getAccountPositions' : IDL.Func(
@@ -19,10 +19,10 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getTokenPrincipal' : IDL.Func([], [IDL.Principal], ['query']),
-    'init' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'liquidatePosition' : IDL.Func([IDL.Nat], [Result], []),
     'setCollateralPrice' : IDL.Func([IDL.Nat], [], []),
     'updatePosition' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [Result], []),
   });
+  return Minter;
 };
-export const init = ({ IDL }) => { return []; };
+export const init = ({ IDL }) => { return [IDL.Text, IDL.Text]; };

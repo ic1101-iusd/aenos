@@ -11,7 +11,7 @@ import B "mo:base/Buffer";
 import Error "mo:base/Error";
 import Result "mo:base/Result";
 
-actor Minter {
+actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
   // FOR DIP20 INTERFACE
   type TxReceipt = {
       #Ok: Nat;
@@ -37,8 +37,8 @@ actor Minter {
 
   public type ProtocolError = { #transferFromError; };
   
-  var collateralActor: ?DIP20 = null;
-  var usbActor: ?DIP20 = null;
+  var collateralActor: ?DIP20 = ?(actor(collateralActorText));
+  var usbActor: ?DIP20 = ?(actor(usbActorText));
   var lastPositionId : Nat = 0;
   var collateralPrice = 0;
   let priceDecimals = 8;
@@ -53,19 +53,6 @@ actor Minter {
     Principal.equal,
     Principal.hash
   );
-
-  public func init(collateralActorText: Text, usbActorText: Text): async () {
-    // Do not allow to call init more then once
-    assert Option.isNull(collateralActor);
-    assert Option.isNull(usbActor);
-    
-    collateralActor := ?(actor(collateralActorText));
-    usbActor := ?(actor(usbActorText));
-    // Take ownership over usb token
-    let _ = do ? {
-      await usbActor!.init();
-    };
-  };
 
   public query func getTokenPrincipal(): async Principal {
     switch (usbActor) {
@@ -166,7 +153,7 @@ actor Minter {
       };
       case (?collateralActor) {
         lastPositionId += 1;
-        let result = await collateralActor.transferFrom(msg.caller, Principal.fromActor(Minter), collateralAmount);
+        let result = await collateralActor.transferFrom(msg.caller, Principal.fromActor(this), collateralAmount);
         switch(result) {
           case (#Err(_)) { throw Error.reject("Could not execute transfer from."); };
           case (#Ok(_)) {};
@@ -243,7 +230,7 @@ actor Minter {
     p.deleted := true;
     positionMap.put(p.id, p);
     let _ = do ? {
-      let res = await usbActor!.transferFrom(caller, Principal.fromActor(Minter), p.stableAmount);
+      let res = await usbActor!.transferFrom(caller, Principal.fromActor(this), p.stableAmount);
       switch(res) {
         case (#Err(_)) { 
           p.deleted := false;
@@ -289,7 +276,7 @@ actor Minter {
     positionMap.put(newPosition.id, newPosition);
 
     
-    let self = Principal.fromActor(Minter);
+    let self = Principal.fromActor(this);
     // Re-transfer token in secure way
     let _ = do ? {
       // Firstly transfer tokens from user if needed
