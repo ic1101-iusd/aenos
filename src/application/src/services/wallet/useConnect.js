@@ -1,5 +1,4 @@
 import { useEffect, useCallback, useState } from 'react';
-import { Principal } from '@dfinity/principal';
 
 import logger from 'Utils/logger';
 import config from 'Constants/config';
@@ -21,12 +20,18 @@ const useConnect = ({ plug }) => {
       return;
     }
 
-    const connected = await plug.current.requestConnect({ whitelist });
+    const connected = await plug.current.requestConnect({
+      whitelist,
+      host: config.HOST,
+    });
 
     if (!connected) return;
 
     if (!plug.current.agent) {
-      await plug.current.current.createAgent({ whitelist });
+      await plug.current.createAgent({
+        whitelist,
+        host: config.HOST,
+      });
     }
 
     const p = await plug.current.agent.getPrincipal();
@@ -46,19 +51,25 @@ const useConnect = ({ plug }) => {
       setIsConnecting(true);
 
       try {
-        const storedPrinciple = localStorage.getItem(PRINCIPLE_KEY);
-        if (storedPrinciple) {
-          setPrinciple(Principal.fromText(storedPrinciple));
-          return;
-        }
-
         if (!window.ic.plug) return;
 
         plug.current = window.ic.plug;
+
+        const storedPrinciple = localStorage.getItem(PRINCIPLE_KEY);
+
+        // todo: comment temporary, maybe remove later
+        // if (storedPrinciple) {
+        //   setPrinciple(Principal.fromText(storedPrinciple));
+        //   return;
+        // }
+
         const connected = await plug.current.isConnected();
 
         if (connected && !plug.current.agent) {
-          await plug.current.createAgent({ whitelist });
+          await plug.current.createAgent({
+            whitelist,
+            host: config.HOST,
+          });
         }
 
         if (connected && plug.current.agent) {

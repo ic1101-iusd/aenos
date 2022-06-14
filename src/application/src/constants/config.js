@@ -1,8 +1,13 @@
-export default {
-  canisterIdSelf: process.env.CANISTER_ID_SELF,
-  canisterIdVault: process.env.CANISTER_ID_VAULT,
-  canisterIdUsbFt: process.env.CANISTER_ID_USB_FT,
-  canisterIdBtcFt: process.env.CANISTER_ID_BTC_FT,
+import canisterIcIds from '../../../../canister_ids.json';
 
-  host: `https://${process.env.CANISTER_ID_SELF}.ic0.app`,
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+const HOST = isDevelopment ? 'http://127.0.0.1:8000' : 'https://mainnet.dfinity.network';
+
+export default {
+  canisterIdVault: isDevelopment ? process.env.PROTOCOL_CANISTER_ID : canisterIcIds.protocol.ic,
+  canisterIdUsbFt: isDevelopment ? process.env.MINT_TOKEN_CANISTER_ID : canisterIcIds.mint_token.ic,
+  canisterIdBtcFt: isDevelopment ? process.env.FAKE_BTC_CANISTER_ID : canisterIcIds.fake_btc.ic,
+  isDevelopment,
+  HOST,
 };

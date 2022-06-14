@@ -84,10 +84,10 @@ module.exports = {
     rules: [
       { test: /\.(js|ts)x?$/, loader: "ts-loader" },
       {
-        test: /\.s[ac]ss$/i,
+        test: /\.(s[ac]|c)ss$/i,
         use: [
           // Creates `style` nodes from JS strings
-          "style-loader",
+          'style-loader',
           // Translates CSS into CommonJS
           {
             loader: 'css-loader',
@@ -139,7 +139,6 @@ module.exports = {
       Buffer: [require.resolve("buffer/"), "Buffer"],
       process: require.resolve("process/browser"),
     }),
-    new Dotenv(),
   ],
   // proxy /api to port 8000 during development
   devServer: {

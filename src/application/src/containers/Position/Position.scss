@@ -1,0 +1,18 @@
+
+.position {
+  display: flex;
+  flex-direction: row;
+  width: fit-content;
+  margin: auto;
+}
+
+.cards {
+  display: flex;
+  flex-direction: row;
+  margin-right: 10px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}

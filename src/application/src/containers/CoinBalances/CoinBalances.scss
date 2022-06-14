@@ -1,27 +1,25 @@
 @use 'Styles/variables';
+@use 'Styles/mix';
 
 .coinBalances {
   width: 250px;
-  border-radius: 25px;
-  background-color: variables.$background-secondary-color;
   margin: 20px auto;
-  padding: 5px 20px;
 
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  @include mix.card;
 }
 
 .balance {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 10px 0;
+  margin-bottom: 15px;
   cursor: default;
 
-  &:hover {
-    transform: scale(1.03);
+  &:last-child {
+    margin-bottom: 0;
   }
+
+  @include mix.hoverScale;
 }
 
 .leftGroup {

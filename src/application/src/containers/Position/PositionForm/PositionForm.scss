@@ -1,0 +1,99 @@
+@use 'Styles/mix';
+@use 'Styles/variables';
+
+.positionForm {
+  @include mix.card;
+
+  width: 400px;
+  margin: 10px;
+  font-weight: bold;
+}
+
+.title {
+  @include mix.title;
+}
+
+.intro {
+  display: block;
+  font-size: 0.9rem;
+  color: variables.$text-secondary-color;
+  margin-top: 10px;
+}
+
+.inputGroup {
+
+  .inputDetails {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: 10px;
+  }
+
+  .inputLabel {
+    @include mix.title;
+  }
+
+  .balance {
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-underline-offset: 2px;
+    text-decoration-style: dotted;
+    text-decoration-line: underline;
+    color: variables.$text-secondary-color;
+
+    &:hover {
+      color: variables.$text-color;
+    }
+  }
+
+  .input {
+    width: 99%;
+  }
+
+  .usdAmount {
+    font-size: 0.9rem;
+    margin-top: 5px;
+    color: variables.$text-secondary-color;
+  }
+}
+
+.slider {
+
+  .sliderHandler {
+    background-color: variables.$background-secondary-color;
+  }
+
+  .sliderInfo {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 5px;
+
+    .group {
+      text-align: center;
+
+      .label {
+        font-size: 0.9rem;
+        color: variables.$text-secondary-color;
+        margin-bottom: 10px;
+      }
+
+      .amount {
+
+      }
+    }
+  }
+
+  .sliderHints {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 5px;
+
+    .hint {
+      font-size: 0.8rem;
+      color: variables.$text-secondary-color;
+    }
+  }
+}

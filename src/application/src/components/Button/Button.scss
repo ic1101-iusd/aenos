@@ -1,17 +1,15 @@
 @use 'Styles/variables';
+@use 'Styles/mix';
 
 .button {
   border: 0;
   padding: 0 10px;
   border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.3s;
-  background-color: variables.$primary-color;
+  background-color: variables.$element-background;
   height: 35px;
 
-  &:hover {
-    transform: scale(1.03);
-  }
+   @include mix.hoverScale();
 
   &:active {
     opacity: 0.9;
