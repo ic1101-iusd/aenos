@@ -9,9 +9,13 @@
   background-color: variables.$element-background;
   height: 35px;
 
-   @include mix.hoverScale();
+  @include mix.hoverScale();
 
   &:active {
     opacity: 0.9;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
   }
 }

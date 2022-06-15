@@ -1,13 +1,16 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Principal } from '@dfinity/principal';
 import { toast } from 'react-toastify';
 
-import { toBigInt } from 'Utils/formatters';
+import { toBigInt, fromBigInt } from 'Utils/formatters';
 import { canisterId as vaultCanisterId } from 'Declarations/protocol';
 import { useCoins } from 'Services/coins';
 import logger from 'Utils/logger';
 
 const usePositions = ({ vaultActor, principle }) => {
+  const [positions, setPositions] = useState([]);
+  const [currentPosition, setCurrentPosition] = useState(null);
+
   const { btc, updateBalances } = useCoins();
 
   const createPosition = useCallback(async (collateralAmount, stableAmount) => {
@@ -17,8 +20,8 @@ const usePositions = ({ vaultActor, principle }) => {
       const collateral = toBigInt(collateralAmount);
       const stable = toBigInt(stableAmount);
 
-      const approve = toast.promise(
-        await btc.actor.approve(
+      const approve = await toast.promise(
+        btc.actor.approve(
           Principal.fromText(vaultCanisterId),
           collateral
         ),
@@ -37,11 +40,11 @@ const usePositions = ({ vaultActor, principle }) => {
 
       console.log({ approve });
 
-      const res = toast.promise(
-        await vaultActor.createPosition(collateral, stable),
+      const res = await toast.promise(
+        vaultActor.createPosition(collateral, stable),
         {
-          pending: `Use ${collateralAmount} BTC as collateral to generate ${stable} AIS`,
-          success: `${stable} AIS generated successfully`,
+          pending: `Use ${collateralAmount} BTC as collateral to generate ${stableAmount} AIS`,
+          success: `${stableAmount} AIS generated successfully`,
           error: {
             render({ error }) {
               logger.error('CreatePosition', error);
@@ -52,7 +55,16 @@ const usePositions = ({ vaultActor, principle }) => {
         }
       );
 
-      console.log({ res });
+      const position = {
+        ...res.ok,
+        collateralAmount: fromBigInt(res.ok.collateralAmount),
+        stableAmount: fromBigInt(res.ok.stableAmount),
+      };
+
+      console.log(position);
+
+      setCurrentPosition(position);
+      setPositions(current => [...current, position]);
 
       await updateBalances();
     } catch (e) {
@@ -62,13 +74,26 @@ const usePositions = ({ vaultActor, principle }) => {
 
   const getAccountPositions = useCallback(async () => {
     try {
-      const positions = await vaultActor.getAccountPositions(principle);
+      const positions = (await vaultActor.getAccountPositions(principle)).map(position => {
+        return {
+          ...position,
+          collateralAmount: fromBigInt(position.collateralAmount),
+          stableAmount: fromBigInt(position.stableAmount),
+        };
+      });
 
       console.log({ positions });
+
+      setPositions(positions);
+
+      // TODO: Temporary setting currentPosition on init
+      if (!currentPosition) {
+        setCurrentPosition(positions[0]);
+      }
     } catch (e) {
       logger.error(e);
     }
-  }, [vaultActor, principle]);
+  }, [vaultActor, principle, currentPosition]);
 
   useEffect(() => {
     if (principle && vaultActor) {
@@ -78,6 +103,8 @@ const usePositions = ({ vaultActor, principle }) => {
 
   return {
     createPosition,
+    positions,
+    currentPosition,
   };
 };
 

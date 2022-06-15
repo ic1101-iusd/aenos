@@ -27,7 +27,7 @@ const VaultProvider = ({ children }) => {
     }
   }, [principle]);
 
-  const { createPosition } = usePositions({ vaultActor, principle });
+  const { createPosition, currentPosition, positions } = usePositions({ vaultActor, principle });
 
   const { collateralPrice } = useCollateralPrice({ vaultActor });
 
@@ -35,8 +35,10 @@ const VaultProvider = ({ children }) => {
     return {
       collateralPrice,
       createPosition,
+      currentPosition,
+      positions,
     };
-  }, [collateralPrice, createPosition]);
+  }, [collateralPrice, createPosition, currentPosition, positions]);
 
   return (
     <VaultContext.Provider value={value}>

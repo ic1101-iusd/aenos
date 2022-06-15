@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import Slider from 'rc-slider';
 
 import Input from 'Components/Input';
@@ -17,9 +17,10 @@ const PositionForm = ({
   collateralRatio,
   setCollateralRatio,
   liquidationPrice,
-  currentPrice,
-  availableDollars,
+  collateralPrice,
+  stableAmount,
   onSubmit,
+  marks,
 }) => {
   const collateralInputRef = useRef();
   const { coins } = useCoins();
@@ -29,6 +30,16 @@ const PositionForm = ({
     setCollateralAmount(bitcoin.balance);
     collateralInputRef.current.value = bitcoin.balance;
   }, [bitcoin]);
+
+  const buttonLabel = useMemo(() => {
+    if (stableAmount > 0) {
+      return `Generate ${stableAmount.toFixed(2)} AIS`;
+    } else if (stableAmount < 0) {
+      return `Repay ${(stableAmount * -1).toFixed(2)} AIS`;
+    } else if (stableAmount === 0 && collateralAmount) {
+      return 'Deposit';
+    }
+  }, [stableAmount, collateralAmount]);
 
   return (
     <div className={styles.positionForm}>
@@ -64,7 +75,7 @@ const PositionForm = ({
           ref={collateralInputRef}
         />
         <div className={styles.usdAmount}>
-          ~{formatDollars(currentPrice)}
+          ~{formatDollars(collateralPrice)}
         </div>
       </div>
 
@@ -99,7 +110,8 @@ const PositionForm = ({
           value={collateralRatio}
           defaultValue={collateralRatio}
           onChange={setCollateralRatio}
-          disabled={!collateralAmount}
+          marks={marks}
+          // disabled={!collateralAmount}
           railStyle={{
             backgroundColor: styleVars.primaryColor,
           }}
@@ -119,8 +131,8 @@ const PositionForm = ({
 
       </div>
 
-      <Button onClick={onSubmit}>
-        Generate {availableDollars.toFixed(2)} USB
+      <Button onClick={onSubmit} disabled={!buttonLabel}>
+        {buttonLabel ?? 'Choose your configuration'}
       </Button>
     </div>
   );

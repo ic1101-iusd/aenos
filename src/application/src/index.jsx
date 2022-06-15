@@ -10,7 +10,7 @@ import App from './App';
 
 import 'Styles/index.scss';
 import '!style-loader!css-loader!rc-slider/assets/index.css';
-import 'react-toastify/dist/ReactToastify.css';
+import '!style-loader!css-loader!react-toastify/dist/ReactToastify.css';
 
 const container = document.getElementById('app');
 
