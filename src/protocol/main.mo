@@ -37,8 +37,8 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
 
   public type ProtocolError = { #transferFromError; };
   
-  var collateralActor: ?DIP20 = ?(actor(collateralActorText));
-  var usbActor: ?DIP20 = ?(actor(usbActorText));
+  var collateralActor: DIP20 = actor(collateralActorText);
+  var usbActor: DIP20 = actor(usbActorText);
   var lastPositionId : Nat = 0;
   var collateralPrice = 0;
   let priceDecimals = 8;
@@ -55,14 +55,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
   );
 
   public query func getTokenPrincipal(): async Principal {
-    switch (usbActor) {
-      case null {
-        throw Error.reject("Contract is not initialized.");
-      };
-      case (?usbActor) {
-       Principal.fromActor(usbActor)
-      }
-    };
+    Principal.fromActor(usbActor)
   };
 
   public func setCollateralPrice(newPrice: Nat): async () {
@@ -145,21 +138,15 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     if (stableAmount * (100 + minRisk) / (100 * 10**8) > collateralAmount * collateralPrice / (10**priceDecimals)) {
       throw Error.reject("Position should be overcollaterized."); 
     };
+
     let newPosition: P.Position = P.Position(lastPositionId, msg.caller, collateralAmount, stableAmount);
-    
-    switch (collateralActor) {
-      case null {
-        throw Error.reject("Conister hasn't been initialized.");
-      };
-      case (?collateralActor) {
-        lastPositionId += 1;
-        let result = await collateralActor.transferFrom(msg.caller, Principal.fromActor(this), collateralAmount);
-        switch(result) {
-          case (#Err(_)) { throw Error.reject("Could not execute transfer from."); };
-          case (#Ok(_)) {};
-        };
-      };
+    lastPositionId += 1;
+    let result = await collateralActor.transferFrom(msg.caller, Principal.fromActor(this), collateralAmount);
+    switch(result) {
+      case (#Err(_)) { throw Error.reject("Could not execute transfer from."); };
+      case (#Ok(_)) {};
     };
+
     positionMap.put(newPosition.getId(), newPosition);
     let accountBuffer = switch(accountPositions.get(msg.caller)) {
       case null {
@@ -172,9 +159,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     accountBuffer.add(newPosition.getId());
     accountPositions.put(msg.caller, accountBuffer);
      // Just need to assign it for some reason =/
-    let _ = do ? {
-      usbActor!.mint(msg.caller, stableAmount)
-    };
+    let _ = usbActor.mint(msg.caller, stableAmount);
     #ok(())
   };
 
@@ -229,20 +214,18 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
   private func processClosePosition(p: P.Position, caller: Principal) : async Result.Result<(), ProtocolError> {
     p.deleted := true;
     positionMap.put(p.id, p);
-    let _ = do ? {
-      let res = await usbActor!.transferFrom(caller, Principal.fromActor(this), p.stableAmount);
-      switch(res) {
-        case (#Err(_)) { 
-          p.deleted := false;
-          positionMap.put(p.id, p);
-          return #err(#transferFromError);
-        };
-        case (#Ok(_)) {};
+    let res = await usbActor.transferFrom(caller, Principal.fromActor(this), p.stableAmount);
+    switch(res) {
+      case (#Err(_)) { 
+        p.deleted := false;
+        positionMap.put(p.id, p);
+        return #err(#transferFromError);
       };
-
-      let _ = usbActor!.burn(p.stableAmount);
-      collateralActor!.transfer(caller, p.collateralAmount);
+      case (#Ok(_)) {};
     };
+
+    let _ = usbActor.burn(p.stableAmount);
+    let _ = collateralActor.transfer(caller, p.collateralAmount);
     #ok(())
   };
 
@@ -278,51 +261,49 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     
     let self = Principal.fromActor(this);
     // Re-transfer token in secure way
-    let _ = do ? {
-      // Firstly transfer tokens from user if needed
-      if (p.stableAmount > newStableAmount) {
-        let stableDiff = p.stableAmount - newStableAmount;
-        let result = await usbActor!.transferFrom(msg.caller, self, stableDiff);
-        switch(result) {
-            case (#Err(_)) { 
-              newPosition.updating := false;
-              positionMap.put(newPosition.id, newPosition);
-              return #err(#transferFromError);
-            };
-            case (#Ok(_)) {
-              let _ = usbActor!.burn(stableDiff);
-              newPosition.stableAmount := newStableAmount;
-              positionMap.put(newPosition.id, newPosition);
-            };
+    // Firstly transfer tokens from user if needed
+    if (p.stableAmount > newStableAmount) {
+      let stableDiff = p.stableAmount - newStableAmount;
+      let result = await usbActor.transferFrom(msg.caller, self, stableDiff);
+      switch(result) {
+          case (#Err(_)) { 
+            newPosition.updating := false;
+            positionMap.put(newPosition.id, newPosition);
+            return #err(#transferFromError);
           };
-      };
-      if (p.collateralAmount < newCollateralAmount) {
-        let result = await collateralActor!.transferFrom(msg.caller, self, newCollateralAmount - p.collateralAmount);
-        switch(result) {
-            case (#Err(_)) { 
-              newPosition.updating := false;
-              positionMap.put(newPosition.id, newPosition);
-              return #err(#transferFromError);
-            };
-            case (#Ok(_)) {
-              newPosition.collateralAmount := newCollateralAmount;
-            };
+          case (#Ok(_)) {
+            let _ = usbActor.burn(stableDiff);
+            newPosition.stableAmount := newStableAmount;
+            positionMap.put(newPosition.id, newPosition);
           };
-      };
-
-      // Secondly send tokens to user if needed
-      // No await required, consider these calls coudn't fail
-      if (p.stableAmount < newStableAmount) {
-        let _ = usbActor!.mint(msg.caller, newStableAmount - p.stableAmount);
-        newPosition.stableAmount := newStableAmount;
-      };
-      if (p.collateralAmount > newCollateralAmount) {
-        let _ = collateralActor!.transfer(msg.caller, p.collateralAmount - newCollateralAmount);
-        newPosition.collateralAmount := newCollateralAmount;
-      };
-      newPosition.updating := false;
-      positionMap.put(newPosition.id, newPosition);
+        };
     };
+    if (p.collateralAmount < newCollateralAmount) {
+      let result = await collateralActor.transferFrom(msg.caller, self, newCollateralAmount - p.collateralAmount);
+      switch(result) {
+          case (#Err(_)) { 
+            newPosition.updating := false;
+            positionMap.put(newPosition.id, newPosition);
+            return #err(#transferFromError);
+          };
+          case (#Ok(_)) {
+            newPosition.collateralAmount := newCollateralAmount;
+          };
+        };
+    };
+
+    // Secondly send tokens to user if needed
+    // No await required, consider these calls coudn't fail
+    if (p.stableAmount < newStableAmount) {
+      let _ = usbActor.mint(msg.caller, newStableAmount - p.stableAmount);
+      newPosition.stableAmount := newStableAmount;
+    };
+    if (p.collateralAmount > newCollateralAmount) {
+      let _ = collateralActor.transfer(msg.caller, p.collateralAmount - newCollateralAmount);
+      newPosition.collateralAmount := newCollateralAmount;
+    };
+    newPosition.updating := false;
+    positionMap.put(newPosition.id, newPosition);
     #ok(())
   };
 };
