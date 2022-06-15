@@ -244,7 +244,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     #ok(())
   };
 
-  public shared(msg) func updatePosition(id: Nat, newCollateralAmount: Nat, newStableAmount: Nat) : async Result.Result<(), ProtocolError> {
+  public shared(msg) func updatePosition(id: Nat, newCollateralAmount: Nat, newStableAmount: Nat) : async Result.Result<P.SharedPosition, ProtocolError> {
     let p = switch(positionMap.get(id)) {
       case null {
         throw Error.reject("No position found."); 
@@ -256,7 +256,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     if (p.deleted) {
       throw Error.reject("The position already closed or closing."); 
     };
-    if (newStableAmount * (100 + minRisk) / 100 > newCollateralAmount * collateralPrice / (10**priceDecimals)) {
+    if (newStableAmount * (100 + minRisk) / (100 * 10**priceDecimals) > newCollateralAmount * collateralPrice / (10**priceDecimals)) {
       throw Error.reject("The position should be overcollaterized."); 
     };
     if (p.updating) {
@@ -319,6 +319,6 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     };
     newPosition.updating := false;
     positionMap.put(newPosition.id, newPosition);
-    #ok(())
+    #ok(newPosition.toShared())
   };
 };
