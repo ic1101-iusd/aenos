@@ -83,7 +83,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
         null
       };
       case (?position) {
-        ?(P.SharedPosition(position))
+        ?(position.toShared())
       }
     }
   };
@@ -109,7 +109,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     for(i in Iter.range(start, end)) {
        switch(positionMap.get(i)) {
           case (?position) {
-            positionsBuffer.add(P.SharedPosition(position));
+            positionsBuffer.add(position.toShared());
           };
           case null {};
        };
@@ -130,7 +130,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     for (pid in idsBuffer.vals()) {
       switch(positionMap.get(pid)) {
           case (?position) {
-            positionsBuffer.add(P.SharedPosition(position));
+            positionsBuffer.add(position.toShared());
           };
           case null {
             throw Error.reject("WTF? Some position not found.");
@@ -142,7 +142,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
 
   public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<(), ProtocolError> {
     // Check if stable is overcollaterized enough
-    if (stableAmount * (100 + minRisk) / 100 > collateralAmount * collateralPrice / (10**priceDecimals)) {
+    if (stableAmount * (100 + minRisk) / (100 * 10**8) > collateralAmount * collateralPrice / (10**priceDecimals)) {
       throw Error.reject("Position should be overcollaterized."); 
     };
     let newPosition: P.Position = P.Position(lastPositionId, msg.caller, collateralAmount, stableAmount);

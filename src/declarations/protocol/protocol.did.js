@@ -1,7 +1,13 @@
 export const idlFactory = ({ IDL }) => {
   const ProtocolError = IDL.Variant({ 'transferFromError' : IDL.Null });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : ProtocolError });
-  const SharedPosition = IDL.Record({});
+  const SharedPosition = IDL.Record({
+    'id' : IDL.Nat,
+    'deleted' : IDL.Bool,
+    'stableAmount' : IDL.Nat,
+    'owner' : IDL.Principal,
+    'collateralAmount' : IDL.Nat,
+  });
   const Minter = IDL.Service({
     'closePosition' : IDL.Func([IDL.Nat], [Result], []),
     'createPosition' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),

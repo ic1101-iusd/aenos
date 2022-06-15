@@ -2,12 +2,12 @@ import Nat "mo:base/Nat";
 import Float "mo:base/Float";
 import Principal "mo:base/Principal";
 module {
-    public class SharedPosition(position: Position) {
-        let id: Nat = position.id;
-        let owner: Principal = position.owner;
-        let collateralAmount: Nat = position.collateralAmount;
-        let stableAmount: Nat = position.stableAmount;
-        let deleted: Bool = position.deleted;
+    public type SharedPosition = {
+        id : Nat;
+        owner : Principal;
+        collateralAmount : Nat;
+        stableAmount : Nat;
+        deleted : Bool;
     };
 
     public class Position(idInit: Nat, ownerInit: Principal, collateralAmountInit: Nat, stableAmountInit: Nat) {
@@ -36,6 +36,16 @@ module {
 
         public func getRatio() : Float {
             Float.fromInt(collateralAmount) / Float.fromInt(stableAmount)
+        };
+
+        public func toShared() : SharedPosition {
+            {
+                id;
+                owner;
+                collateralAmount;
+                stableAmount;
+                deleted;
+            }
         };
 
         public func getLiqudationPrice(collateralPrice: Float, liqudationThreshold: Float) : Float {

@@ -17,5 +17,11 @@ export interface Minter {
 export type ProtocolError = { 'transferFromError' : null };
 export type Result = { 'ok' : null } |
   { 'err' : ProtocolError };
-export type SharedPosition = {};
+export interface SharedPosition {
+  'id' : bigint,
+  'deleted' : boolean,
+  'stableAmount' : bigint,
+  'owner' : Principal,
+  'collateralAmount' : bigint,
+}
 export interface _SERVICE extends Minter {}

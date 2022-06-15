@@ -1,4 +1,11 @@
-type SharedPosition = record {};
+type SharedPosition = 
+ record {
+   collateralAmount: nat;
+   deleted: bool;
+   id: nat;
+   owner: principal;
+   stableAmount: nat;
+ };
 type Result = 
  variant {
    err: ProtocolError;
