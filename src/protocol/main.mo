@@ -135,7 +135,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
 
   public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<(), ProtocolError> {
     // Check if stable is overcollaterized enough
-    if (stableAmount * (100 + minRisk) / (100 * 10**8) > collateralAmount * collateralPrice / (10**priceDecimals)) {
+    if (stableAmount * (100 + minRisk) / (100 * 10**priceDecimals) > collateralAmount * collateralPrice / (10**priceDecimals)) {
       throw Error.reject("Position should be overcollaterized."); 
     };
 
