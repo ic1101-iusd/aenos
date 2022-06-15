@@ -13,19 +13,20 @@ import Result "mo:base/Result";
 
 actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
   // FOR DIP20 INTERFACE
+  type DIP20ErrList = {
+    #InsufficientAllowance;
+    #InsufficientBalance;
+    #ErrorOperationStyle;
+    #Unauthorized;
+    #LedgerTrap;
+    #ErrorTo;
+    #Other: Text;
+    #BlockUsed;
+    #AmountTooSmall;
+  };
   type TxReceipt = {
       #Ok: Nat;
-      #Err: {
-          #InsufficientAllowance;
-          #InsufficientBalance;
-          #ErrorOperationStyle;
-          #Unauthorized;
-          #LedgerTrap;
-          #ErrorTo;
-          #Other: Text;
-          #BlockUsed;
-          #AmountTooSmall;
-      };
+      #Err: DIP20ErrList;
   };
   type DIP20 = actor {
     init(): async ();
@@ -35,7 +36,21 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     burn(amount: Nat): async TxReceipt;
   };
 
-  public type ProtocolError = { #transferFromError; };
+  func err2text(error: DIP20ErrList): Text {
+    switch(error) {
+      case(#InsufficientAllowance) {"InsufficientAllowance"};
+      case(#InsufficientBalance) {"InsufficientBalance"};
+      case(#ErrorOperationStyle) {"ErrorOperationStyle"};
+      case(#Unauthorized) {"Unauthorized"};
+      case(#LedgerTrap) {"LedgerTrap"};
+      case(#ErrorTo) {"ErrorTo"};
+      case(#BlockUsed) {"BlockUsed"};
+      case(#AmountTooSmall) {"AmountTooSmall"};
+      case(#Other(text)) {"Other: "# text};
+    }
+  };
+
+  public type ProtocolError = { #transferFromError: DIP20ErrList; };
   
   var collateralActor: DIP20 = actor(collateralActorText);
   var usbActor: DIP20 = actor(usbActorText);
@@ -143,7 +158,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     lastPositionId += 1;
     let result = await collateralActor.transferFrom(msg.caller, Principal.fromActor(this), collateralAmount);
     switch(result) {
-      case (#Err(_)) { throw Error.reject("Could not execute transfer from."); };
+      case (#Err(error)) { throw Error.reject("Could not execute transfer from: " # err2text(error)); };
       case (#Ok(_)) {};
     };
 
@@ -216,10 +231,10 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     positionMap.put(p.id, p);
     let res = await usbActor.transferFrom(caller, Principal.fromActor(this), p.stableAmount);
     switch(res) {
-      case (#Err(_)) { 
+      case (#Err(error)) { 
         p.deleted := false;
         positionMap.put(p.id, p);
-        return #err(#transferFromError);
+        return #err(#transferFromError(error));
       };
       case (#Ok(_)) {};
     };
@@ -229,7 +244,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     #ok(())
   };
 
-  public shared(msg) func updatePosition(id: Nat, newCollateralAmount: Nat, newStableAmount: Nat) : async Result.Result<(), ProtocolError> {
+  public shared(msg) func updatePosition(id: Nat, newCollateralAmount: Nat, newStableAmount: Nat) : async Result.Result<P.SharedPosition, ProtocolError> {
     let p = switch(positionMap.get(id)) {
       case null {
         throw Error.reject("No position found."); 
@@ -241,7 +256,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     if (p.deleted) {
       throw Error.reject("The position already closed or closing."); 
     };
-    if (newStableAmount * (100 + minRisk) / 100 > newCollateralAmount * collateralPrice / (10**priceDecimals)) {
+    if (newStableAmount * (100 + minRisk) / (100 * 10**priceDecimals) > newCollateralAmount * collateralPrice / (10**priceDecimals)) {
       throw Error.reject("The position should be overcollaterized."); 
     };
     if (p.updating) {
@@ -266,10 +281,10 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
       let stableDiff = p.stableAmount - newStableAmount;
       let result = await usbActor.transferFrom(msg.caller, self, stableDiff);
       switch(result) {
-          case (#Err(_)) { 
+          case (#Err(error)) { 
             newPosition.updating := false;
             positionMap.put(newPosition.id, newPosition);
-            return #err(#transferFromError);
+            return #err(#transferFromError(error));
           };
           case (#Ok(_)) {
             let _ = usbActor.burn(stableDiff);
@@ -281,10 +296,10 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     if (p.collateralAmount < newCollateralAmount) {
       let result = await collateralActor.transferFrom(msg.caller, self, newCollateralAmount - p.collateralAmount);
       switch(result) {
-          case (#Err(_)) { 
+          case (#Err(error)) { 
             newPosition.updating := false;
             positionMap.put(newPosition.id, newPosition);
-            return #err(#transferFromError);
+            return #err(#transferFromError(error));
           };
           case (#Ok(_)) {
             newPosition.collateralAmount := newCollateralAmount;
@@ -304,6 +319,6 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     };
     newPosition.updating := false;
     positionMap.put(newPosition.id, newPosition);
-    #ok(())
+    #ok(newPosition.toShared())
   };
 };
