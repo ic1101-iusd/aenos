@@ -101,6 +101,15 @@ const PositionForm = ({
           </div>
         </div>
 
+        <div className={styles.sliderHints}>
+          <div className={styles.hint}>
+            Lowest Risk
+          </div>
+          <div className={styles.hint}>
+            Highest Risk
+          </div>
+        </div>
+
         <Slider
           className={styles.sliderHandler}
           min={1}
@@ -120,19 +129,10 @@ const PositionForm = ({
           }}
         />
 
-        <div className={styles.sliderHints}>
-          <div className={styles.hint}>
-            Lowest Risk
-          </div>
-          <div className={styles.hint}>
-            Highest Risk
-          </div>
-        </div>
-
       </div>
 
       <Button onClick={onSubmit} disabled={!buttonLabel}>
-        {buttonLabel ?? 'Choose your configuration'}
+        {buttonLabel ?? 'Update your configuration'}
       </Button>
     </div>
   );
