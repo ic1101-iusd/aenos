@@ -2,7 +2,7 @@
 @use 'Styles/mix';
 
 .coinBalances {
-  width: 250px;
+  width: 400px;
   margin: 20px auto;
 
   @include mix.card;
@@ -42,5 +42,6 @@
 }
 
 .amount {
-
+  font-weight: bold;
+  font-size: 1rem;
 }

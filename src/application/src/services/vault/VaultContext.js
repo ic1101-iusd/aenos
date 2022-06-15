@@ -1,14 +1,12 @@
 import { createContext } from 'react';
 
-export const BTC_PRICE_MOCK = 20000;
-
 const VaultContext = createContext({
   createPosition: () => {},
   updatePosition: () => {},
   getAccountPositions: () => {},
   deletePosition: () => {},
   getCollateralPrice: () => {},
-  collateralPrice: BTC_PRICE_MOCK,
+  collateralPrice: 0,
   positions: [],
   currentPosition: null,
 });
