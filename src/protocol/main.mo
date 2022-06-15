@@ -133,7 +133,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     positionsBuffer.toArray()
   };
 
-  public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<(), ProtocolError> {
+  public shared(msg) func createPosition(collateralAmount: Nat, stableAmount: Nat) : async Result.Result<P.SharedPosition, ProtocolError> {
     // Check if stable is overcollaterized enough
     if (stableAmount * (100 + minRisk) / (100 * 10**priceDecimals) > collateralAmount * collateralPrice / (10**priceDecimals)) {
       throw Error.reject("Position should be overcollaterized."); 
@@ -160,7 +160,7 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     accountPositions.put(msg.caller, accountBuffer);
      // Just need to assign it for some reason =/
     let _ = usbActor.mint(msg.caller, stableAmount);
-    #ok(())
+    #ok(newPosition.toShared())
   };
 
   public shared(msg) func closePosition(id: Nat) : async Result.Result<(), ProtocolError> {
