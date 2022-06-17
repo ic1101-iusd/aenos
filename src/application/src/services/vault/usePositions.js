@@ -7,41 +7,45 @@ import { canisterId as vaultCanisterId } from 'Declarations/protocol';
 import { useCoins } from 'Services/coins';
 import logger from 'Utils/logger';
 
+const coinApprove = async (coin, amount, bigIntAmount) => {
+  const approve = await toast.promise(
+    coin.actor.approve(
+      Principal.fromText(vaultCanisterId),
+      bigIntAmount
+    ),
+    {
+      pending: `Approving ${amount} ${coin.symbol}`,
+      success: `Approved successfully`,
+      error: {
+        render({ error }) {
+          logger.error(`Approving ${coin.symbol}`, error);
+
+          return 'Something went wrong. Try again later.';
+        }
+      },
+    }
+  );
+
+  logger.log({ approve });
+};
+
 const usePositions = ({ vaultActor, principle }) => {
   const [positions, setPositions] = useState([]);
   const [currentPosition, setCurrentPosition] = useState(null);
 
-  const { btc, updateBalances } = useCoins();
+  const { btc, ais, updateBalances } = useCoins();
 
   const createPosition = useCallback(async (collateralAmount, stableAmount) => {
     try {
-      console.log({ collateralAmount, stableAmount, btc });
+      logger.log('create', { collateralAmount, stableAmount });
 
-      const collateral = toBigInt(collateralAmount);
-      const stable = toBigInt(stableAmount);
+      const bigIntCollateral = toBigInt(collateralAmount);
+      const bigIntStable = toBigInt(stableAmount);
 
-      const approve = await toast.promise(
-        btc.actor.approve(
-          Principal.fromText(vaultCanisterId),
-          collateral
-        ),
-        {
-          pending: `Approving ${collateralAmount} BTC`,
-          success: `Approved successfully`,
-          error: {
-            render({ error }) {
-              logger.error('Approving BTC', error);
-
-              return 'Something went wrong. Try again later.';
-            }
-          },
-        }
-      );
-
-      console.log({ approve });
+      await coinApprove(btc, collateralAmount, bigIntCollateral);
 
       const res = await toast.promise(
-        vaultActor.createPosition(collateral, stable),
+        vaultActor.createPosition(bigIntCollateral, bigIntStable),
         {
           pending: `Use ${collateralAmount} BTC as collateral to generate ${stableAmount} AIS`,
           success: `${stableAmount} AIS generated successfully`,
@@ -61,7 +65,7 @@ const usePositions = ({ vaultActor, principle }) => {
         stableAmount: fromBigInt(res.ok.stableAmount),
       };
 
-      console.log(position);
+      logger.log(position);
 
       setCurrentPosition(position);
       setPositions(current => [...current, position]);
@@ -70,7 +74,57 @@ const usePositions = ({ vaultActor, principle }) => {
     } catch (e) {
       logger.error(e);
     }
-  }, [vaultActor, principle, btc]);
+  }, [vaultActor, btc]);
+
+  const updatePosition = useCallback(async (id, diffCollateral, diffStable) => {
+    try {
+      logger.log('update', { id, diffCollateral, diffStable, currentPosition });
+
+      const collateral = currentPosition.collateralAmount + diffCollateral;
+      const stable = currentPosition.stableAmount + diffStable;
+
+      const bigIntCollateral = toBigInt(collateral);
+      const bigIntStable = toBigInt(stable);
+      const bigIntDiffCollateral = toBigInt(diffCollateral);
+      const bigIntDiffStable = toBigInt(diffStable);
+
+      if (diffCollateral > 0) {
+        await coinApprove(btc, diffCollateral, bigIntDiffCollateral);
+      }
+      if (diffStable < 0) {
+        await coinApprove(ais, diffStable * -1, bigIntDiffStable * -1);
+      }
+
+      const res = await toast.promise(
+        vaultActor.updatePosition(id, bigIntCollateral, bigIntStable),
+        {
+          pending: 'Updating position...',
+          success: 'Position updated',
+          error: {
+            render({ error }) {
+              logger.error('UpdatePosition', error);
+
+              return 'Something went wrong. Try again later.';
+            }
+          },
+        }
+      );
+
+      const position = {
+        ...res.ok,
+        collateralAmount: fromBigInt(res.ok.collateralAmount),
+        stableAmount: fromBigInt(res.ok.stableAmount),
+      };
+
+      logger.log('res', position);
+
+      setCurrentPosition(position);
+
+      await updateBalances();
+    } catch (e) {
+      logger.error(e);
+    }
+  }, [currentPosition, vaultActor, btc, ais]);
 
   const getAccountPositions = useCallback(async () => {
     try {
@@ -82,7 +136,7 @@ const usePositions = ({ vaultActor, principle }) => {
         };
       });
 
-      console.log({ positions });
+      logger.log({ positions });
 
       setPositions(positions);
 
@@ -105,6 +159,7 @@ const usePositions = ({ vaultActor, principle }) => {
     createPosition,
     positions,
     currentPosition,
+    updatePosition,
   };
 };
 

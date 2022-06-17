@@ -15,12 +15,15 @@ const DEFAULT_STATS = {
   collateralLockedUsd: 0,
 };
 
+const DEFAULT_MAX_RATIO = 10;
+
 const Position = () => {
   const [collateralAmount, setCollateralAmount] = useState(0);
-  // default 300% (low risk)
-  const [collateralRatio, setCollateralRatio] = useState(3);
+  // default 1000% (low risk)
+  const [collateralRatio, setCollateralRatio] = useState(DEFAULT_MAX_RATIO);
+  const [maxRatio, setMaxRatio] = useState(DEFAULT_MAX_RATIO);
 
-  const { createPosition, collateralPrice, currentPosition } = useVault();
+  const { createPosition, collateralPrice, currentPosition, updatePosition } = useVault();
 
   const currentStats = useMemo(() => {
     if (!currentPosition || !collateralPrice) {
@@ -33,7 +36,7 @@ const Position = () => {
     setCollateralRatio(collateralRatio);
 
     return {
-      liquidationPrice,
+      liquidationPrice: Number(liquidationPrice.toFixed(5)),
       debt: Number(currentPosition.stableAmount.toFixed(5)),
       collateralLocked: currentPosition.collateralAmount,
       collateralLockedUsd: currentPosition.collateralAmount * collateralPrice,
@@ -47,35 +50,42 @@ const Position = () => {
     const liquidationPrice = formulas.getLiquidationPrice(totalCollateralAmount, debt);
 
     return {
-      liquidationPrice,
+      liquidationPrice: Number(liquidationPrice.toFixed(5)),
       debt: Number(debt.toFixed(5)),
       collateralLockedUsd: totalCollateralAmount * collateralPrice,
     };
   }, [collateralAmount, collateralRatio, collateralPrice, currentStats]);
 
   const marks = useMemo(() => {
+    if (!collateralAmount || !currentStats.collateralLocked) return {};
+
     const totalCollateralAmount = Number(collateralAmount) + currentStats.collateralLocked;
 
-    const noGenerateCollateralRatio = collateralAmount ?
-      formulas.getCollateralRatio(totalCollateralAmount, collateralPrice, currentStats.debt) : null;
+    const noGenerateCollateralRatio = formulas.getCollateralRatio(totalCollateralAmount, collateralPrice, currentStats.debt);
 
-    if (noGenerateCollateralRatio) {
-      setCollateralRatio(noGenerateCollateralRatio);
-    }
+    setCollateralRatio(noGenerateCollateralRatio);
+    setMaxRatio(noGenerateCollateralRatio);
 
-    return noGenerateCollateralRatio ? {
+    return {
       [noGenerateCollateralRatio]: {
         style: {
           fontSize: '0.7rem',
         },
         label: 'Deposit',
       },
-    } : {};
-  }, [collateralAmount, currentStats]);
+    };
+  }, [collateralAmount]);
 
-  const handleSubmit = useCallback(() => {
-    createPosition(collateralAmount, nextStats.debt);
-  }, [nextStats, collateralAmount]);
+  const handleSubmit = useCallback(async () => {
+    if (currentPosition) {
+      // maybe pass diff
+      await updatePosition(currentPosition.id, collateralAmount, nextStats.debt - currentStats.debt);
+    } else {
+      await createPosition(collateralAmount, nextStats.debt);
+    }
+
+    setCollateralAmount(0);
+  }, [nextStats, collateralAmount, currentPosition]);
 
   return (
     <div className={styles.position}>
@@ -121,6 +131,7 @@ const Position = () => {
         stableAmount={nextStats.debt - currentStats.debt}
         onSubmit={handleSubmit}
         marks={marks}
+        maxRatio={maxRatio}
       />
     </div>
   );

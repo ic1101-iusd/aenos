@@ -21,10 +21,16 @@ const PositionForm = ({
   stableAmount,
   onSubmit,
   marks,
+  maxRatio,
 }) => {
   const collateralInputRef = useRef();
   const { coins } = useCoins();
   const bitcoin = coins[0];
+
+  const handleSubmit = useCallback(() => {
+    onSubmit();
+    collateralInputRef.current.value = '';
+  }, [onSubmit]);
 
   const handleBalanceClick = useCallback(() => {
     setCollateralAmount(bitcoin.balance);
@@ -112,10 +118,10 @@ const PositionForm = ({
 
         <Slider
           className={styles.sliderHandler}
-          min={1}
-          max={3}
+          min={1.2}
+          max={maxRatio}
           reverse
-          step={0.01}
+          step={(maxRatio - 1.2) / 100}
           value={collateralRatio}
           defaultValue={collateralRatio}
           onChange={setCollateralRatio}
@@ -131,7 +137,7 @@ const PositionForm = ({
 
       </div>
 
-      <Button onClick={onSubmit} disabled={!buttonLabel}>
+      <Button onClick={handleSubmit} disabled={!buttonLabel}>
         {buttonLabel ?? 'Update your configuration'}
       </Button>
     </div>
