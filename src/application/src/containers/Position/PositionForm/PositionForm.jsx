@@ -46,12 +46,14 @@ const PositionForm = ({
   const buttonLabel = useMemo(() => {
     if (stableAmount > 0) {
       return `Generate ${stableAmount.toFixed(2)} ${iUsd.symbol}`;
+    } else if (collateralRatio === 0 && collateralAmount > 0) {
+      return `Repay ${(stableAmount * -1).toFixed(2)} ${iUsd.symbol} & Close position`;
     } else if (stableAmount < 0) {
       return `Repay ${(stableAmount * -1).toFixed(2)} ${iUsd.symbol}`;
     } else if (stableAmount === 0 && collateralAmount) {
       return isDeposit ? 'Deposit' : 'Withdraw';
     }
-  }, [stableAmount, collateralAmount, isDeposit]);
+  }, [stableAmount, collateralAmount, isDeposit, collateralRatio]);
 
   const handleCollateralAmountChange = useCallback((e) => {
     const value = Number(e.target.value) * (isDeposit ? 1 : -1);
@@ -163,7 +165,7 @@ const PositionForm = ({
 
       <Button
         onClick={handleSubmit}
-        disabled={!buttonLabel || collateralRatio < MIN_RATIO}
+        disabled={!buttonLabel || (collateralRatio < MIN_RATIO && collateralRatio !== 0)}
       >
         {buttonLabel ?? 'Update your configuration'}
       </Button>
