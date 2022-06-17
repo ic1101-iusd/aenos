@@ -64,7 +64,9 @@ const Position = () => {
     const noGenerateCollateralRatio = formulas.getCollateralRatio(totalCollateralAmount, collateralPrice, currentStats.debt);
 
     setCollateralRatio(noGenerateCollateralRatio);
-    setMaxRatio(noGenerateCollateralRatio);
+    if (maxRatio < noGenerateCollateralRatio) {
+      setMaxRatio(noGenerateCollateralRatio);
+    }
 
     return {
       [noGenerateCollateralRatio]: {
