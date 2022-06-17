@@ -1,27 +1,21 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 
 import formulas from 'Utils/formulas';
 import { formatDollars } from 'Utils/formatters';
 import { useVault } from 'Services/vault';
 
+import { DEFAULT_STATS, DEFAULT_MAX_RATIO, MIN_RATIO } from './constants';
 import PriceCard from './PriceCard';
 import PositionForm from './PositionForm';
 import styles from './Position.scss';
-
-const DEFAULT_STATS = {
-  liquidationPrice: 0,
-  debt: 0,
-  collateralLocked: 0,
-  collateralLockedUsd: 0,
-};
-
-const DEFAULT_MAX_RATIO = 10;
 
 const Position = () => {
   const [collateralAmount, setCollateralAmount] = useState(0);
   // default 1000% (low risk)
   const [collateralRatio, setCollateralRatio] = useState(DEFAULT_MAX_RATIO);
   const [maxRatio, setMaxRatio] = useState(DEFAULT_MAX_RATIO);
+  const [minRatio, setMinRatio] = useState(MIN_RATIO);
+  const [isDeposit, setIsDeposit] = useState(true);
 
   const { createPosition, collateralPrice, currentPosition, updatePosition } = useVault();
 
@@ -67,16 +61,23 @@ const Position = () => {
     if (maxRatio < noGenerateCollateralRatio) {
       setMaxRatio(noGenerateCollateralRatio);
     }
+    if (minRatio > noGenerateCollateralRatio) {
+      setMinRatio(noGenerateCollateralRatio);
+    }
 
     return {
       [noGenerateCollateralRatio]: {
         style: {
           fontSize: '0.7rem',
         },
-        label: 'Deposit',
+        label: isDeposit ? 'Deposit' : 'Withdraw',
       },
     };
   }, [collateralAmount]);
+
+  useEffect(() => {
+    setCollateralAmount(current => current * -1);
+  }, [isDeposit]);
 
   const handleSubmit = useCallback(async () => {
     if (currentPosition) {
@@ -118,7 +119,7 @@ const Position = () => {
             amount={currentStats.collateralLockedUsd}
             afterAmount={nextStats.collateralLockedUsd}
           >
-            {currentStats.collateralLocked} WBTC
+            {currentStats.collateralLocked} BTC
           </PriceCard>
         </div>
       </div>
@@ -134,6 +135,9 @@ const Position = () => {
         onSubmit={handleSubmit}
         marks={marks}
         maxRatio={maxRatio}
+        minRatio={minRatio}
+        isDeposit={isDeposit}
+        setIsDeposit={setIsDeposit}
       />
     </div>
   );

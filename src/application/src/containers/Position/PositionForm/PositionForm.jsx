@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useMemo } from 'react';
 import Slider from 'rc-slider';
+import cn from 'classnames';
 
 import Input from 'Components/Input';
 import Button from 'Components/Button';
@@ -7,9 +8,8 @@ import { useCoins } from 'Services/coins';
 import { formatDollars, formatPercent } from 'Utils/formatters';
 import styleVars from 'Styles/variables.scss';
 
+import { ONE_MILLION, MIN_RATIO } from '../constants';
 import styles from './PositionForm.scss';
-
-const ONE_MILLION = 10**6;
 
 const PositionForm = ({
   collateralAmount,
@@ -22,10 +22,16 @@ const PositionForm = ({
   onSubmit,
   marks,
   maxRatio,
+  minRatio,
+  isDeposit,
+  setIsDeposit,
 }) => {
   const collateralInputRef = useRef();
-  const { coins } = useCoins();
-  const bitcoin = coins[0];
+  const { iUsd, btc } = useCoins();
+
+  const handleCollateralSign = useCallback(() => {
+    setIsDeposit(current => !current);
+  }, []);
 
   const handleSubmit = useCallback(() => {
     onSubmit();
@@ -33,48 +39,62 @@ const PositionForm = ({
   }, [onSubmit]);
 
   const handleBalanceClick = useCallback(() => {
-    setCollateralAmount(bitcoin.balance);
-    collateralInputRef.current.value = bitcoin.balance;
-  }, [bitcoin]);
+    setCollateralAmount(btc.balance);
+    collateralInputRef.current.value = btc.balance;
+  }, [btc]);
 
   const buttonLabel = useMemo(() => {
     if (stableAmount > 0) {
-      return `Generate ${stableAmount.toFixed(2)} AIS`;
+      return `Generate ${stableAmount.toFixed(2)} ${iUsd.symbol}`;
     } else if (stableAmount < 0) {
-      return `Repay ${(stableAmount * -1).toFixed(2)} AIS`;
+      return `Repay ${(stableAmount * -1).toFixed(2)} ${iUsd.symbol}`;
     } else if (stableAmount === 0 && collateralAmount) {
-      return 'Deposit';
+      return isDeposit ? 'Deposit' : 'Withdraw';
     }
-  }, [stableAmount, collateralAmount]);
+  }, [stableAmount, collateralAmount, isDeposit]);
+
+  const handleCollateralAmountChange = useCallback((e) => {
+    const value = Number(e.target.value) * (isDeposit ? 1 : -1);
+
+    setCollateralAmount(value);
+  }, [isDeposit]);
 
   return (
     <div className={styles.positionForm}>
-      <div>
-        <div className={styles.title}>
-          Configure your Vault
+      <div className={styles.header}>
+        <div>
+          <div className={styles.title}>
+            Configure your Vault
+          </div>
+
+          <div className={styles.intro}>
+            {isDeposit ? 'Deposit BTC - generate iUSD' : 'Withdraw BTC - repay iUSD'}
+          </div>
         </div>
 
-        <div className={styles.intro}>
-          Deposit BTC - generate DAS
-        </div>
+        <Button
+          onClick={handleCollateralSign}
+        >
+          {isDeposit ? 'Withdraw' : 'Deposit'}
+        </Button>
       </div>
 
       <div className={styles.inputGroup}>
         <div className={styles.inputDetails}>
           <div className={styles.inputLabel}>
-            Deposit BTC
+            {isDeposit ? 'Deposit' : 'Withdraw'} BTC
           </div>
 
           <div
             className={styles.balance}
             onClick={handleBalanceClick}
           >
-            {bitcoin.balance} BTC
+            {btc.balance} BTC
           </div>
         </div>
         <Input
           className={styles.input}
-          onChange={setCollateralAmount}
+          onChange={handleCollateralAmountChange}
           placeholder="0.00"
           max={ONE_MILLION}
           type="number"
@@ -101,7 +121,12 @@ const PositionForm = ({
             <div className={styles.label}>
               Collateral Ratio
             </div>
-            <div className={styles.amount}>
+            <div
+              className={cn([
+                styles.amount,
+                collateralRatio < MIN_RATIO && collateralRatio > 0 ? styles.redAmount : null
+              ])}
+            >
               {formatPercent(collateralRatio)}
             </div>
           </div>
@@ -118,15 +143,14 @@ const PositionForm = ({
 
         <Slider
           className={styles.sliderHandler}
-          min={1.2}
+          min={minRatio}
           max={maxRatio}
           reverse
-          step={(maxRatio - 1.2) / 100}
+          step={(maxRatio - minRatio) / 100}
           value={collateralRatio}
           defaultValue={collateralRatio}
           onChange={setCollateralRatio}
           marks={marks}
-          // disabled={!collateralAmount}
           railStyle={{
             backgroundColor: styleVars.primaryColor,
           }}
@@ -137,7 +161,10 @@ const PositionForm = ({
 
       </div>
 
-      <Button onClick={handleSubmit} disabled={!buttonLabel}>
+      <Button
+        onClick={handleSubmit}
+        disabled={!buttonLabel || collateralRatio < MIN_RATIO}
+      >
         {buttonLabel ?? 'Update your configuration'}
       </Button>
     </div>

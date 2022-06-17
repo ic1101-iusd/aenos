@@ -4,9 +4,15 @@
 .positionForm {
   @include mix.card;
 
-  width: 400px;
+  width: 420px;
   margin: 10px;
   font-weight: bold;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .title {
@@ -80,7 +86,9 @@
       }
 
       .amount {
-
+      }
+      .redAmount {
+        color: variables.$red-color;
       }
     }
   }
