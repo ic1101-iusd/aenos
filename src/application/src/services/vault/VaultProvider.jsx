@@ -27,7 +27,13 @@ const VaultProvider = ({ children }) => {
     }
   }, [principle]);
 
-  const { createPosition, currentPosition, positions, updatePosition } = usePositions({ vaultActor, principle });
+  const {
+    createPosition,
+    currentPosition,
+    positions,
+    updatePosition,
+    setCurrentPosition,
+  } = usePositions({ vaultActor, principle });
 
   const { collateralPrice } = useCollateralPrice({ vaultActor });
 
@@ -38,6 +44,7 @@ const VaultProvider = ({ children }) => {
       currentPosition,
       positions,
       updatePosition,
+      setCurrentPosition,
     };
   }, [collateralPrice, createPosition, currentPosition, positions, updatePosition]);
 

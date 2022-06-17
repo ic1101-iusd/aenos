@@ -160,6 +160,7 @@ const usePositions = ({ vaultActor, principle }) => {
     positions,
     currentPosition,
     updatePosition,
+    setCurrentPosition,
   };
 };
 

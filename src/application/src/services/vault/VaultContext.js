@@ -9,6 +9,7 @@ const VaultContext = createContext({
   collateralPrice: 0,
   positions: [],
   currentPosition: null,
+  setCurrentPosition: () => {},
 });
 
 export default VaultContext;
