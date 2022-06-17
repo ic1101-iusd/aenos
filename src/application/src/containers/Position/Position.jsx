@@ -8,53 +8,84 @@ import PriceCard from './PriceCard';
 import PositionForm from './PositionForm';
 import styles from './Position.scss';
 
-const getStats = ({ collateralRatio, collateralAmount, currentPrice, prevCollateralLocked }) => {
-  const collateralLocked = collateralAmount + prevCollateralLocked;
-
-  formulas.collateralRatio = collateralRatio;
-  formulas.collateralPrice = currentPrice;
-  formulas.collateralAmount = collateralAmount;
-  const liquidationPrice = formulas.getLiquidationPrice();
-  const buyingPower = Math.round(formulas.getBuyingPower(collateralAmount));
-  const availableDollars = formulas.getAvailableDollars(collateralAmount);
-
-  return {
-    liquidationPrice,
-    buyingPower,
-    availableDollars,
-    collateralLocked,
-    collateralLockedUsd: collateralLocked * currentPrice,
-  };
+const DEFAULT_STATS = {
+  liquidationPrice: 0,
+  debt: 0,
+  collateralLocked: 0,
+  collateralLockedUsd: 0,
 };
+
+const DEFAULT_MAX_RATIO = 10;
 
 const Position = () => {
   const [collateralAmount, setCollateralAmount] = useState(0);
-  // default 300% (low risk)
-  const [collateralRatio, setCollateralRatio] = useState(3);
-  const { createPosition, collateralPrice: currentPrice } = useVault();
+  // default 1000% (low risk)
+  const [collateralRatio, setCollateralRatio] = useState(DEFAULT_MAX_RATIO);
+  const [maxRatio, setMaxRatio] = useState(DEFAULT_MAX_RATIO);
 
-  const stats = useMemo(() => {
+  const { createPosition, collateralPrice, currentPosition, updatePosition } = useVault();
+
+  const currentStats = useMemo(() => {
+    if (!currentPosition || !collateralPrice) {
+      return DEFAULT_STATS;
+    }
+
+    const collateralRatio = formulas.getCollateralRatio(currentPosition.collateralAmount, collateralPrice, currentPosition.stableAmount);
+    const liquidationPrice = formulas.getLiquidationPrice(currentPosition.collateralAmount, currentPosition.stableAmount);
+
+    setCollateralRatio(collateralRatio);
+
     return {
-      liquidationPrice: 0,
-      buyingPower: 0,
-      availableDollars: 0,
-      collateralLocked: 0,
-      collateralLockedUsd: 0,
+      liquidationPrice: Number(liquidationPrice.toFixed(5)),
+      debt: Number(currentPosition.stableAmount.toFixed(5)),
+      collateralLocked: currentPosition.collateralAmount,
+      collateralLockedUsd: currentPosition.collateralAmount * collateralPrice,
     };
-  }, []);
+  }, [currentPosition, collateralPrice]);
 
   const nextStats = useMemo(() => {
-    return getStats({
-      collateralAmount,
-      collateralRatio,
-      currentPrice,
-      prevCollateralLocked: stats.collateralLocked,
-    });
-  }, [collateralAmount, collateralRatio, currentPrice, stats.collateralLocked]);
+    const totalCollateralAmount = Number(collateralAmount) + currentStats.collateralLocked;
 
-  const handleSubmit = useCallback(() => {
-    createPosition(collateralAmount, nextStats.availableDollars);
-  }, [nextStats.availableDollars, collateralAmount]);
+    const debt = formulas.getAvailableDollars(totalCollateralAmount, collateralPrice, collateralRatio);
+    const liquidationPrice = formulas.getLiquidationPrice(totalCollateralAmount, debt);
+
+    return {
+      liquidationPrice: Number(liquidationPrice.toFixed(5)),
+      debt: Number(debt.toFixed(5)),
+      collateralLockedUsd: totalCollateralAmount * collateralPrice,
+    };
+  }, [collateralAmount, collateralRatio, collateralPrice, currentStats]);
+
+  const marks = useMemo(() => {
+    if (!collateralAmount || !currentStats.collateralLocked) return {};
+
+    const totalCollateralAmount = Number(collateralAmount) + currentStats.collateralLocked;
+
+    const noGenerateCollateralRatio = formulas.getCollateralRatio(totalCollateralAmount, collateralPrice, currentStats.debt);
+
+    setCollateralRatio(noGenerateCollateralRatio);
+    setMaxRatio(noGenerateCollateralRatio);
+
+    return {
+      [noGenerateCollateralRatio]: {
+        style: {
+          fontSize: '0.7rem',
+        },
+        label: 'Deposit',
+      },
+    };
+  }, [collateralAmount]);
+
+  const handleSubmit = useCallback(async () => {
+    if (currentPosition) {
+      // maybe pass diff
+      await updatePosition(currentPosition.id, collateralAmount, nextStats.debt - currentStats.debt);
+    } else {
+      await createPosition(collateralAmount, nextStats.debt);
+    }
+
+    setCollateralAmount(0);
+  }, [nextStats, collateralAmount, currentPosition]);
 
   return (
     <div className={styles.position}>
@@ -63,31 +94,29 @@ const Position = () => {
           <PriceCard
             label="Liquidation Price"
             formatter={formatDollars}
-            amount={stats.liquidationPrice}
+            amount={currentStats.liquidationPrice}
             afterAmount={nextStats.liquidationPrice}
           />
           <PriceCard
             label="Current Price"
             formatter={formatDollars}
-            amount={currentPrice}
+            amount={collateralPrice}
           />
         </div>
         <div className={styles.column}>
           <PriceCard
-            label="Buying Power"
+            label="Debt"
             formatter={formatDollars}
-            amount={stats.buyingPower}
-            afterAmount={nextStats.buyingPower}
-          >
-            {(stats.buyingPower / currentPrice).toFixed(8)} WBTC
-          </PriceCard>
+            amount={currentStats.debt}
+            afterAmount={nextStats.debt}
+          />
           <PriceCard
             label="Collateral Locked"
             formatter={formatDollars}
-            amount={stats.collateralLockedUsd}
+            amount={currentStats.collateralLockedUsd}
             afterAmount={nextStats.collateralLockedUsd}
           >
-            {stats.collateralLocked} WBTC
+            {currentStats.collateralLocked} WBTC
           </PriceCard>
         </div>
       </div>
@@ -97,10 +126,12 @@ const Position = () => {
         setCollateralAmount={setCollateralAmount}
         collateralRatio={collateralRatio}
         setCollateralRatio={setCollateralRatio}
-        currentPrice={currentPrice}
+        collateralPrice={collateralPrice}
         liquidationPrice={nextStats.liquidationPrice}
-        availableDollars={nextStats.availableDollars}
+        stableAmount={nextStats.debt - currentStats.debt}
         onSubmit={handleSubmit}
+        marks={marks}
+        maxRatio={maxRatio}
       />
     </div>
   );

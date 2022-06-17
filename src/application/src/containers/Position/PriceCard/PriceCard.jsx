@@ -12,7 +12,7 @@ const PriceCard = ({ label, amount, afterAmount, children, formatter = (val) => 
         <div className={styles.amount}>
           {formatter(amount)}
         </div>
-        {afterAmount ? (
+        {afterAmount && amount !== afterAmount ? (
           <div className={styles.badge}>
             {formatter(afterAmount)} after
           </div>

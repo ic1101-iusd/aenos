@@ -23,7 +23,7 @@ const CoinsProvider = ({ children }) => {
   const [coins, setCoins] = useState(defaultCoins);
   // todo: check in mainnet working and maybe add loading
 
-  const { fetchTokenData } = useTokenData({
+  const { updateBalances } = useTokenData({
     coins,
     setCoins,
   });
@@ -31,7 +31,7 @@ const CoinsProvider = ({ children }) => {
   const value = useMemo(() => {
     return {
       coins,
-      fetchTokenData,
+      updateBalances,
       btc: coins[0],
       ais: coins[1],
     };

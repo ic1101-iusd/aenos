@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import Slider from 'rc-slider';
 
 import Input from 'Components/Input';
@@ -17,18 +17,35 @@ const PositionForm = ({
   collateralRatio,
   setCollateralRatio,
   liquidationPrice,
-  currentPrice,
-  availableDollars,
+  collateralPrice,
+  stableAmount,
   onSubmit,
+  marks,
+  maxRatio,
 }) => {
   const collateralInputRef = useRef();
   const { coins } = useCoins();
   const bitcoin = coins[0];
 
+  const handleSubmit = useCallback(() => {
+    onSubmit();
+    collateralInputRef.current.value = '';
+  }, [onSubmit]);
+
   const handleBalanceClick = useCallback(() => {
     setCollateralAmount(bitcoin.balance);
     collateralInputRef.current.value = bitcoin.balance;
   }, [bitcoin]);
+
+  const buttonLabel = useMemo(() => {
+    if (stableAmount > 0) {
+      return `Generate ${stableAmount.toFixed(2)} AIS`;
+    } else if (stableAmount < 0) {
+      return `Repay ${(stableAmount * -1).toFixed(2)} AIS`;
+    } else if (stableAmount === 0 && collateralAmount) {
+      return 'Deposit';
+    }
+  }, [stableAmount, collateralAmount]);
 
   return (
     <div className={styles.positionForm}>
@@ -64,7 +81,7 @@ const PositionForm = ({
           ref={collateralInputRef}
         />
         <div className={styles.usdAmount}>
-          ~{formatDollars(currentPrice)}
+          ~{formatDollars(collateralPrice)}
         </div>
       </div>
 
@@ -90,24 +107,6 @@ const PositionForm = ({
           </div>
         </div>
 
-        <Slider
-          className={styles.sliderHandler}
-          min={1}
-          max={3}
-          reverse
-          step={0.01}
-          value={collateralRatio}
-          defaultValue={collateralRatio}
-          onChange={setCollateralRatio}
-          disabled={!collateralAmount}
-          railStyle={{
-            backgroundColor: styleVars.primaryColor,
-          }}
-          trackStyle={{
-            backgroundColor: styleVars.elementBackground,
-          }}
-        />
-
         <div className={styles.sliderHints}>
           <div className={styles.hint}>
             Lowest Risk
@@ -117,10 +116,29 @@ const PositionForm = ({
           </div>
         </div>
 
+        <Slider
+          className={styles.sliderHandler}
+          min={1.2}
+          max={maxRatio}
+          reverse
+          step={(maxRatio - 1.2) / 100}
+          value={collateralRatio}
+          defaultValue={collateralRatio}
+          onChange={setCollateralRatio}
+          marks={marks}
+          // disabled={!collateralAmount}
+          railStyle={{
+            backgroundColor: styleVars.primaryColor,
+          }}
+          trackStyle={{
+            backgroundColor: styleVars.elementBackground,
+          }}
+        />
+
       </div>
 
-      <Button onClick={onSubmit}>
-        Generate {availableDollars.toFixed(2)} USB
+      <Button onClick={handleSubmit} disabled={!buttonLabel}>
+        {buttonLabel ?? 'Update your configuration'}
       </Button>
     </div>
   );
