@@ -25,8 +25,8 @@ const PositionForm = ({
   minRatio,
   isDeposit,
   setIsDeposit,
+  collateralInputRef,
 }) => {
-  const collateralInputRef = useRef();
   const { iUsd, btc } = useCoins();
 
   const handleCollateralSign = useCallback(() => {

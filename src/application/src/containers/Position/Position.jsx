@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 
 import formulas from 'Utils/formulas';
 import { formatDollars } from 'Utils/formatters';
@@ -16,6 +16,7 @@ const Position = () => {
   const [maxRatio, setMaxRatio] = useState(DEFAULT_MAX_RATIO);
   const [minRatio, setMinRatio] = useState(MIN_RATIO);
   const [isDeposit, setIsDeposit] = useState(true);
+  const collateralInputRef = useRef();
 
   const {
     createPosition,
@@ -102,6 +103,12 @@ const Position = () => {
     setCollateralAmount(0);
   }, [nextStats, collateralAmount, currentPosition]);
 
+  const handleLockedCollateralSet = useCallback(() => {
+    setCollateralAmount(currentStats.collateralLocked);
+    setIsDeposit(false);
+    collateralInputRef.current.value = currentStats.collateralLocked;
+  }, [currentStats.collateralLocked]);
+
   return (
     <div className={styles.position}>
       <div className={styles.cards}>
@@ -131,7 +138,12 @@ const Position = () => {
             amount={currentStats.collateralLockedUsd}
             afterAmount={nextStats.collateralLockedUsd}
           >
-            {currentStats.collateralLocked} BTC
+            <div
+              className={styles.lockedAmount}
+              onClick={handleLockedCollateralSet}
+            >
+              {currentStats.collateralLocked} BTC
+            </div>
           </PriceCard>
         </div>
       </div>
@@ -150,6 +162,7 @@ const Position = () => {
         minRatio={minRatio}
         isDeposit={isDeposit}
         setIsDeposit={setIsDeposit}
+        collateralInputRef={collateralInputRef}
       />
     </div>
   );

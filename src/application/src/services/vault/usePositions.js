@@ -126,6 +126,29 @@ const usePositions = ({ vaultActor, principle }) => {
     }
   }, [currentPosition, vaultActor, btc, iUsd, updateBalances]);
 
+  const getAccountPositions = useCallback(async () => {
+    try {
+      const positions = (await vaultActor.getAccountPositions(principle)).map(position => {
+        return {
+          ...position,
+          collateralAmount: fromBigInt(position.collateralAmount),
+          stableAmount: fromBigInt(position.stableAmount),
+        };
+      });
+
+      logger.log({ positions });
+
+      setPositions(positions);
+
+      // TODO: Temporary setting currentPosition on init
+      if (!currentPosition) {
+        setCurrentPosition(positions.filter(position => !(position.deleted || position.liquidated))?.[0] ?? null);
+      }
+    } catch (e) {
+      logger.error(e);
+    }
+  }, [vaultActor, principle, currentPosition]);
+
   const closePosition = useCallback(async (id) => {
     try {
       const closingPosition = positions.find(position => position.id === id);
@@ -156,33 +179,11 @@ const usePositions = ({ vaultActor, principle }) => {
       setCurrentPosition(null);
 
       await updateBalances();
+      await getAccountPositions();
     } catch (e) {
       logger.error(e);
     }
-  }, [currentPosition, updateBalances, btc, iUsd]);
-
-  const getAccountPositions = useCallback(async () => {
-    try {
-      const positions = (await vaultActor.getAccountPositions(principle)).map(position => {
-        return {
-          ...position,
-          collateralAmount: fromBigInt(position.collateralAmount),
-          stableAmount: fromBigInt(position.stableAmount),
-        };
-      });
-
-      logger.log({ positions });
-
-      setPositions(positions);
-
-      // TODO: Temporary setting currentPosition on init
-      if (!currentPosition) {
-        setCurrentPosition(positions.filter(position => !(position.deleted || position.liquidated))?.[0] ?? null);
-      }
-    } catch (e) {
-      logger.error(e);
-    }
-  }, [vaultActor, principle, currentPosition]);
+  }, [currentPosition, updateBalances, btc, iUsd, getAccountPositions]);
 
   useEffect(() => {
     if (principle && vaultActor) {

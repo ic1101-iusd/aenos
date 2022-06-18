@@ -41,16 +41,9 @@
   }
 
   .balance {
-    cursor: pointer;
     font-size: 0.9rem;
-    text-underline-offset: 2px;
-    text-decoration-style: dotted;
-    text-decoration-line: underline;
-    color: variables.$text-secondary-color;
 
-    &:hover {
-      color: variables.$text-color;
-    }
+    @include mix.underline-selection;
   }
 
   .input {
