@@ -98,3 +98,15 @@
     }
   }
 }
+
+.buttons {
+  display: flex;
+
+  .submit {
+    width: 100%;
+  }
+
+  .addNewPosition {
+    margin-left: 10px;
+  }
+}
