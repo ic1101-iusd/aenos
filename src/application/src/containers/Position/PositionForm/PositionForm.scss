@@ -4,9 +4,15 @@
 .positionForm {
   @include mix.card;
 
-  width: 400px;
+  width: 420px;
   margin: 10px;
   font-weight: bold;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .title {
@@ -35,16 +41,9 @@
   }
 
   .balance {
-    cursor: pointer;
     font-size: 0.9rem;
-    text-underline-offset: 2px;
-    text-decoration-style: dotted;
-    text-decoration-line: underline;
-    color: variables.$text-secondary-color;
 
-    &:hover {
-      color: variables.$text-color;
-    }
+    @include mix.underline-selection;
   }
 
   .input {
@@ -80,7 +79,9 @@
       }
 
       .amount {
-
+      }
+      .redAmount {
+        color: variables.$red-color;
       }
     }
   }

@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 
+import { fromBigInt } from 'Utils/formatters';
+
 const FIVE_MINUTES = 5 * 60 * 1000;
 
 const useCollateralPrice = ({ vaultActor }) => {
@@ -8,7 +10,7 @@ const useCollateralPrice = ({ vaultActor }) => {
   const getCollateralPrice = useCallback(async () => {
     const price = await vaultActor.getCollateralPrice();
 
-    setCollateralPrice(Number(price));
+    setCollateralPrice(fromBigInt(price));
   }, [vaultActor]);
 
   useEffect(() => {

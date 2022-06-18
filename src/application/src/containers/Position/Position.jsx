@@ -1,32 +1,33 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 
 import formulas from 'Utils/formulas';
 import { formatDollars } from 'Utils/formatters';
 import { useVault } from 'Services/vault';
 
+import { DEFAULT_STATS, DEFAULT_MAX_RATIO, MIN_RATIO } from './constants';
 import PriceCard from './PriceCard';
 import PositionForm from './PositionForm';
 import styles from './Position.scss';
-
-const DEFAULT_STATS = {
-  liquidationPrice: 0,
-  debt: 0,
-  collateralLocked: 0,
-  collateralLockedUsd: 0,
-};
-
-const DEFAULT_MAX_RATIO = 10;
 
 const Position = () => {
   const [collateralAmount, setCollateralAmount] = useState(0);
   // default 1000% (low risk)
   const [collateralRatio, setCollateralRatio] = useState(DEFAULT_MAX_RATIO);
   const [maxRatio, setMaxRatio] = useState(DEFAULT_MAX_RATIO);
+  const [minRatio, setMinRatio] = useState(MIN_RATIO);
+  const [isDeposit, setIsDeposit] = useState(true);
+  const collateralInputRef = useRef();
 
-  const { createPosition, collateralPrice, currentPosition, updatePosition } = useVault();
+  const {
+    createPosition,
+    collateralPrice,
+    currentPosition,
+    updatePosition,
+    closePosition,
+  } = useVault();
 
   const currentStats = useMemo(() => {
-    if (!currentPosition || !collateralPrice) {
+    if (!currentPosition || !collateralPrice || currentPosition.collateralAmount === 0) {
       return DEFAULT_STATS;
     }
 
@@ -64,28 +65,49 @@ const Position = () => {
     const noGenerateCollateralRatio = formulas.getCollateralRatio(totalCollateralAmount, collateralPrice, currentStats.debt);
 
     setCollateralRatio(noGenerateCollateralRatio);
-    setMaxRatio(noGenerateCollateralRatio);
+    if (maxRatio < noGenerateCollateralRatio) {
+      setMaxRatio(noGenerateCollateralRatio);
+    }
+    if (minRatio > noGenerateCollateralRatio && noGenerateCollateralRatio >= 0) {
+      setMinRatio(noGenerateCollateralRatio);
+    }
 
     return {
       [noGenerateCollateralRatio]: {
         style: {
           fontSize: '0.7rem',
         },
-        label: 'Deposit',
+        label: isDeposit ? 'Deposit' : 'Withdraw',
       },
     };
   }, [collateralAmount]);
 
+  useEffect(() => {
+    setCollateralAmount(current => current * -1);
+  }, [isDeposit]);
+
   const handleSubmit = useCallback(async () => {
     if (currentPosition) {
-      // maybe pass diff
-      await updatePosition(currentPosition.id, collateralAmount, nextStats.debt - currentStats.debt);
+      // when collateralRatio == 0 it means we're withdrawing the whole locked collateral -> we're closing position
+      if (collateralRatio === 0 && Math.abs(collateralAmount) === currentPosition.collateralAmount) {
+        await closePosition(currentPosition.id);
+
+        setCollateralRatio(DEFAULT_MAX_RATIO);
+      } else {
+        await updatePosition(currentPosition.id, collateralAmount, nextStats.debt - currentStats.debt);
+      }
     } else {
       await createPosition(collateralAmount, nextStats.debt);
     }
 
     setCollateralAmount(0);
   }, [nextStats, collateralAmount, currentPosition]);
+
+  const handleLockedCollateralSet = useCallback(() => {
+    setCollateralAmount(currentStats.collateralLocked);
+    setIsDeposit(false);
+    collateralInputRef.current.value = currentStats.collateralLocked;
+  }, [currentStats.collateralLocked]);
 
   return (
     <div className={styles.position}>
@@ -116,7 +138,12 @@ const Position = () => {
             amount={currentStats.collateralLockedUsd}
             afterAmount={nextStats.collateralLockedUsd}
           >
-            {currentStats.collateralLocked} WBTC
+            <div
+              className={styles.lockedAmount}
+              onClick={handleLockedCollateralSet}
+            >
+              {currentStats.collateralLocked} BTC
+            </div>
           </PriceCard>
         </div>
       </div>
@@ -132,6 +159,10 @@ const Position = () => {
         onSubmit={handleSubmit}
         marks={marks}
         maxRatio={maxRatio}
+        minRatio={minRatio}
+        isDeposit={isDeposit}
+        setIsDeposit={setIsDeposit}
+        collateralInputRef={collateralInputRef}
       />
     </div>
   );

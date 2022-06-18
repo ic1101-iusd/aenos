@@ -22,3 +22,15 @@
   font-size: 1.5rem;
   font-weight: bold;
 }
+
+@mixin underline-selection {
+  cursor: pointer;
+  text-underline-offset: 2px;
+  text-decoration-style: dotted;
+  text-decoration-line: underline;
+  color: variables.$text-secondary-color;
+
+  &:hover {
+    color: variables.$text-color;
+  }
+}

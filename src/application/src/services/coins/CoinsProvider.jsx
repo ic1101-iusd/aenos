@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 
-import { canisterId as aisCanisterId, idlFactory as aisIdl } from 'Declarations/mint_token';
+import { canisterId as iUsdCanisterId, idlFactory as iUsdIdl } from 'Declarations/mint_token';
 import { canisterId as btcCanisterId, idlFactory as btcIdl } from 'Declarations/fake_btc';
 
 import useTokenData from './useTokenData';
@@ -14,8 +14,8 @@ const defaultCoins = [
   },
   {
     id: 2,
-    canisterId: aisCanisterId,
-    idl: aisIdl,
+    canisterId: iUsdCanisterId,
+    idl: iUsdIdl,
   },
 ];
 
@@ -33,7 +33,7 @@ const CoinsProvider = ({ children }) => {
       coins,
       updateBalances,
       btc: coins[0],
-      ais: coins[1],
+      iUsd: coins[1],
     };
   }, [coins]);
 

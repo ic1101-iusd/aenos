@@ -4,7 +4,7 @@ const VaultContext = createContext({
   createPosition: () => {},
   updatePosition: () => {},
   getAccountPositions: () => {},
-  deletePosition: () => {},
+  closePosition: () => {},
   getCollateralPrice: () => {},
   collateralPrice: 0,
   positions: [],
