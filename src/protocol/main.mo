@@ -220,8 +220,13 @@ actor class Minter(collateralActorText: Text, usbActorText: Text) = this {
     if (p.stableAmount * (100 + minRisk) / 100 <= p.collateralAmount * collateralPrice / (10**priceDecimals)) {
       throw Error.reject("Position is fine, no liquidation required."); 
     };
-
-    await processClosePosition(p, msg.caller)
+    let result = await processClosePosition(p, msg.caller);
+    if (Result.isOk(result)) {
+      p.liquidated := true;
+      p.deleted := true;
+      positionMap.put(id, p);
+    };
+    result
   };
 
   // This function make call more expensive and longer
