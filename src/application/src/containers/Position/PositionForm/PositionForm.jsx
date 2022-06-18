@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import Slider from 'rc-slider';
 import cn from 'classnames';
 
@@ -8,7 +8,7 @@ import { useCoins } from 'Services/coins';
 import { formatDollars, formatPercent } from 'Utils/formatters';
 import styleVars from 'Styles/variables.scss';
 
-import { ONE_MILLION, MIN_RATIO } from '../constants';
+import { ONE_MILLION, MIN_RATIO, DEFAULT_MAX_RATIO } from '../constants';
 import styles from './PositionForm.scss';
 
 const PositionForm = ({
@@ -26,6 +26,8 @@ const PositionForm = ({
   isDeposit,
   setIsDeposit,
   collateralInputRef,
+  currentPosition,
+  setCurrentPosition,
 }) => {
   const { iUsd, btc } = useCoins();
 
@@ -46,20 +48,25 @@ const PositionForm = ({
   const buttonLabel = useMemo(() => {
     if (stableAmount > 0) {
       return `Generate ${stableAmount.toFixed(2)} ${iUsd.symbol}`;
-    } else if (collateralRatio === 0 && Math.abs(collateralAmount) > 0) {
+    } else if (collateralRatio === 0 && Math.abs(collateralAmount) === currentPosition?.collateralAmount) {
       return `Repay ${(stableAmount * -1).toFixed(2)} ${iUsd.symbol} & Close position`;
     } else if (stableAmount < 0) {
       return `Repay ${(stableAmount * -1).toFixed(2)} ${iUsd.symbol}`;
     } else if (stableAmount === 0 && collateralAmount) {
       return isDeposit ? 'Deposit' : 'Withdraw';
     }
-  }, [stableAmount, collateralAmount, isDeposit, collateralRatio]);
+  }, [stableAmount, collateralAmount, isDeposit, collateralRatio, currentPosition?.collateralAmount]);
 
   const handleCollateralAmountChange = useCallback((e) => {
     const value = Number(e.target.value) * (isDeposit ? 1 : -1);
 
     setCollateralAmount(value);
   }, [isDeposit]);
+
+  const unsetCurrentPosition = useCallback(() => {
+    setCurrentPosition(null);
+    setCollateralRatio(DEFAULT_MAX_RATIO);
+  }, []);
 
   return (
     <div className={styles.positionForm}>
@@ -163,13 +170,24 @@ const PositionForm = ({
 
       </div>
 
-      <Button
-        onClick={handleSubmit}
-        // TODO: add more disabled options depending on available balance
-        disabled={!buttonLabel || (collateralRatio < MIN_RATIO && collateralRatio !== 0)}
-      >
-        {buttonLabel ?? 'Update your configuration'}
-      </Button>
+      <div className={styles.buttons}>
+        <Button
+          className={styles.submit}
+          onClick={handleSubmit}
+          // TODO: add more disabled options depending on available balance
+          disabled={!buttonLabel || (collateralRatio < MIN_RATIO && collateralRatio !== 0)}
+        >
+          {buttonLabel ?? 'Update your configuration'}
+        </Button>
+        {Boolean(currentPosition) ? (
+          <Button
+            className={styles.addNewPosition}
+            onClick={unsetCurrentPosition}
+          >
+            +
+          </Button>
+        ) : null}
+      </div>
     </div>
   );
 };

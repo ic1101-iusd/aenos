@@ -24,6 +24,7 @@ const Position = () => {
     currentPosition,
     updatePosition,
     closePosition,
+    setCurrentPosition,
   } = useVault();
 
   const currentStats = useMemo(() => {
@@ -163,6 +164,8 @@ const Position = () => {
         isDeposit={isDeposit}
         setIsDeposit={setIsDeposit}
         collateralInputRef={collateralInputRef}
+        currentPosition={currentPosition}
+        setCurrentPosition={setCurrentPosition}
       />
     </div>
   );
