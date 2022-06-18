@@ -74,7 +74,7 @@ const usePositions = ({ vaultActor, principle }) => {
     } catch (e) {
       logger.error(e);
     }
-  }, [vaultActor, btc]);
+  }, [vaultActor, btc, updateBalances]);
 
   const updatePosition = useCallback(async (id, diffCollateral, diffStable) => {
     try {
@@ -124,7 +124,42 @@ const usePositions = ({ vaultActor, principle }) => {
     } catch (e) {
       logger.error(e);
     }
-  }, [currentPosition, vaultActor, btc, iUsd]);
+  }, [currentPosition, vaultActor, btc, iUsd, updateBalances]);
+
+  const closePosition = useCallback(async (id) => {
+    try {
+      const closingPosition = positions.find(position => position.id === id);
+
+      logger.log('closePotion', { id, closingPosition });
+
+      const bigIntDebt = toBigInt(closingPosition.stableAmount);
+
+      await coinApprove(iUsd, closingPosition.stableAmount, bigIntDebt);
+
+      const res = await toast.promise(
+        vaultActor.closePosition(id),
+        {
+          pending: 'Closing position...',
+          success: `Position closed, ${closingPosition.collateralAmount} ${btc.symbol} moved back to your wallet`,
+          error: {
+            render({ error }) {
+              logger.error('ClosePosition', error);
+
+              return 'Something went wrong. Try again later.';
+            }
+          },
+        }
+      );
+
+      console.log({ res });
+
+      setCurrentPosition(null);
+
+      await updateBalances();
+    } catch (e) {
+      logger.error(e);
+    }
+  }, [currentPosition, updateBalances, btc, iUsd]);
 
   const getAccountPositions = useCallback(async () => {
     try {
@@ -142,7 +177,7 @@ const usePositions = ({ vaultActor, principle }) => {
 
       // TODO: Temporary setting currentPosition on init
       if (!currentPosition) {
-        setCurrentPosition(positions[0]);
+        setCurrentPosition(positions.filter(position => !(position.deleted || position.liquidated))?.[0] ?? null);
       }
     } catch (e) {
       logger.error(e);
@@ -161,6 +196,7 @@ const usePositions = ({ vaultActor, principle }) => {
     currentPosition,
     updatePosition,
     setCurrentPosition,
+    closePosition,
   };
 };
 

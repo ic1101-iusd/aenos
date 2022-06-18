@@ -46,7 +46,7 @@ const PositionForm = ({
   const buttonLabel = useMemo(() => {
     if (stableAmount > 0) {
       return `Generate ${stableAmount.toFixed(2)} ${iUsd.symbol}`;
-    } else if (collateralRatio === 0 && collateralAmount > 0) {
+    } else if (collateralRatio === 0 && Math.abs(collateralAmount) > 0) {
       return `Repay ${(stableAmount * -1).toFixed(2)} ${iUsd.symbol} & Close position`;
     } else if (stableAmount < 0) {
       return `Repay ${(stableAmount * -1).toFixed(2)} ${iUsd.symbol}`;
@@ -165,6 +165,7 @@ const PositionForm = ({
 
       <Button
         onClick={handleSubmit}
+        // TODO: add more disabled options depending on available balance
         disabled={!buttonLabel || (collateralRatio < MIN_RATIO && collateralRatio !== 0)}
       >
         {buttonLabel ?? 'Update your configuration'}

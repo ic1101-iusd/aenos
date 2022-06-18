@@ -17,10 +17,16 @@ const Position = () => {
   const [minRatio, setMinRatio] = useState(MIN_RATIO);
   const [isDeposit, setIsDeposit] = useState(true);
 
-  const { createPosition, collateralPrice, currentPosition, updatePosition } = useVault();
+  const {
+    createPosition,
+    collateralPrice,
+    currentPosition,
+    updatePosition,
+    closePosition,
+  } = useVault();
 
   const currentStats = useMemo(() => {
-    if (!currentPosition || !collateralPrice) {
+    if (!currentPosition || !collateralPrice || currentPosition.collateralAmount === 0) {
       return DEFAULT_STATS;
     }
 
@@ -61,7 +67,7 @@ const Position = () => {
     if (maxRatio < noGenerateCollateralRatio) {
       setMaxRatio(noGenerateCollateralRatio);
     }
-    if (minRatio > noGenerateCollateralRatio) {
+    if (minRatio > noGenerateCollateralRatio && noGenerateCollateralRatio >= 0) {
       setMinRatio(noGenerateCollateralRatio);
     }
 
@@ -81,8 +87,14 @@ const Position = () => {
 
   const handleSubmit = useCallback(async () => {
     if (currentPosition) {
-      // maybe pass diff
-      await updatePosition(currentPosition.id, collateralAmount, nextStats.debt - currentStats.debt);
+      // when collateralRatio == 0 it means we're withdrawing the whole locked collateral -> we're closing position
+      if (collateralRatio === 0 && Math.abs(collateralAmount) === currentPosition.collateralAmount) {
+        await closePosition(currentPosition.id);
+
+        setCollateralRatio(DEFAULT_MAX_RATIO);
+      } else {
+        await updatePosition(currentPosition.id, collateralAmount, nextStats.debt - currentStats.debt);
+      }
     } else {
       await createPosition(collateralAmount, nextStats.debt);
     }
