@@ -8,6 +8,8 @@ module {
         collateralAmount : Nat;
         stableAmount : Nat;
         deleted : Bool;
+        updating : Bool;
+        liquidated : Bool;
     };
 
     public class Position(idInit: Nat, ownerInit: Principal, collateralAmountInit: Nat, stableAmountInit: Nat) {
@@ -17,6 +19,7 @@ module {
         public var stableAmount = stableAmountInit;
         public var deleted = false;
         public var updating = false;
+        public var liquidated = false;
         
         public func getId(): Nat {
             id
@@ -45,6 +48,8 @@ module {
                 collateralAmount;
                 stableAmount;
                 deleted;
+                updating;
+                liquidated;
             }
         };
 
