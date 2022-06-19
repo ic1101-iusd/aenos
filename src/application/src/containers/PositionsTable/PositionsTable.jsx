@@ -7,6 +7,7 @@ import {formatDollars} from 'Utils/formatters';
 import {formatPercent} from 'Utils/formatters';
 import Button from "Components/Button";
 
+// TODO: refactor table and styles
 const PositionsTable = ({onSubmit}) => {
     const columns = React.useMemo(() => {
         return getColumns();
