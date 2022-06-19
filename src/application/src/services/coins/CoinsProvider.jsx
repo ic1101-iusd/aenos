@@ -38,13 +38,14 @@ const CoinsProvider = ({ children }) => {
       try {
         logger.log('Dropping... 1 BTC');
         await axios.post(`${ config.SERVER_HOST }/transfer/${ principle.toString() }`);
+        await updateBalances();
 
         logger.log('Dropped 1 BTC');
       } catch (e) {
         logger.error(e);
       }
     }
-  }, [principle]);
+  }, [principle, updateBalances]);
 
   const value = useMemo(() => {
     return {
