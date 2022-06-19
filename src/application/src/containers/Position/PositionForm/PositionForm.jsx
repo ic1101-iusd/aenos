@@ -55,7 +55,7 @@ const PositionForm = ({
     } else if (stableAmount === 0 && collateralAmount) {
       return isDeposit ? 'Deposit' : 'Withdraw';
     }
-  }, [stableAmount, collateralAmount, isDeposit, collateralRatio, currentPosition?.collateralAmount]);
+  }, [stableAmount, collateralAmount, isDeposit, collateralRatio, currentPosition?.collateralAmount, iUsd]);
 
   const handleCollateralAmountChange = useCallback((e) => {
     const value = Number(e.target.value) * (isDeposit ? 1 : -1);
