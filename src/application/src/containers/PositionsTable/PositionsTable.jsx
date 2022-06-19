@@ -16,6 +16,8 @@ const PositionsTable = ({onSubmit}) => {
         setCurrentPosition(activePosition[0]);
     }, [positions]);
     const handleClose = useCallback((id) => {
+        const activePosition = positions.find(position => position.id === id);
+        setCurrentPosition(activePosition[0]);
         closePosition(id)
     }, [positions]);
 
@@ -130,6 +132,7 @@ function toActivePosition(cell, handleOnClickCheckbox, currentPosition) {
     const id = cell.row.original.id;
     return <td><label className="form-control">
         <input type="checkbox" name="checkbox-checked"
+               disabled={cell.row.original.status !== 'Active'}
                checked={currentPosition?.id === id}
                onClick={event => handleOnClickCheckbox(id)}/>
     </label>
