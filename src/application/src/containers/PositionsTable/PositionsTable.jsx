@@ -114,7 +114,7 @@ function renderCell(cell, currentPosition, handleOnClickCheckbox, handleClose) {
     const cellAction = {
         'activePosition': toActivePosition(cell, handleOnClickCheckbox, currentPosition),
         'close': toClose(cell, handleClose, currentPosition),
-        'status': createCellForStatus(cell.value, cell)
+        'status': toStatus(cell.value, cell)
     }
     return cellAction[cell.column.id] || <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
 }
@@ -149,7 +149,7 @@ function defineStatus(position) {
     return 'Active';
 }
 
-function createCellForStatus(status, cell) {
+function toStatus(status, cell) {
     switch (status) {
         case 'Active':
             return <td className={styles.Active}>{cell.render('Cell')}</td>;
