@@ -3,7 +3,8 @@ import {useTable} from 'react-table';
 import {useVault} from 'Services/vault';
 import formulas from 'Utils/formulas';
 import styles from './PositionsTable.scss';
-import {formatDollars} from 'Utils/formatters';
+import {formatDollars, formatCoins} from 'Utils/formatters';
+import { useCoins } from 'Services/coins';
 import {formatPercent} from 'Utils/formatters';
 import Button from "Components/Button";
 
@@ -13,6 +14,7 @@ const PositionsTable = ({onSubmit}) => {
         return getColumns();
     }, [])
     const {positions, currentPosition, setCurrentPosition, collateralPrice, closePosition} = useVault();
+    const { iUsd } = useCoins();
     const handleOnClickCheckbox = useCallback((id) => {
         const activePosition = positions.find(position => position.id === id);
         setCurrentPosition(activePosition);
@@ -22,8 +24,16 @@ const PositionsTable = ({onSubmit}) => {
     }, [positions, closePosition]);
 
     const data = React.useMemo(() => {
-        return constructTableData(positions, currentPosition, collateralPrice)
-    }, [positions, currentPosition, collateralPrice])
+        return positions.map((position) => ({
+            id: position.id,
+            activePosition: position.id === currentPosition?.id,
+            collateralLocked: `${ position.collateralAmount } BTC`,
+            debt: `${ formatCoins(position.stableAmount) } ${ iUsd.symbol }`,
+            collateralRatio: formatPercent(formulas.getCollateralRatio(position.collateralAmount, collateralPrice, position.stableAmount)),
+            liquidationPrice: formatDollars(formulas.getLiquidationPrice(position.collateralAmount, position.stableAmount)),
+            status: defineStatus(position)
+        }));
+    }, [positions, currentPosition, collateralPrice, iUsd]);
     const {
         getTableProps,
         getTableBodyProps,
@@ -60,22 +70,6 @@ const PositionsTable = ({onSubmit}) => {
             </tbody>
         </table>
     )
-}
-
-function constructTableData(positions, currentPosition, collateralPrice) {
-    const positionDataTable = [];
-    positions.forEach((position) => {
-        positionDataTable.push({
-            id: position.id,
-            activePosition: position.id === currentPosition?.id,
-            collateralLocked: position.collateralAmount + " BTC",
-            debt: formatDollars(position.stableAmount),
-            collateralRatio: formatPercent(formulas.getCollateralRatio(position.collateralAmount, collateralPrice, position.stableAmount)),
-            liquidationPrice: formatDollars(formulas.getLiquidationPrice(position.collateralAmount, position.stableAmount)),
-            status: defineStatus(position)
-        });
-    });
-    return positionDataTable;
 }
 
 function getColumns() {

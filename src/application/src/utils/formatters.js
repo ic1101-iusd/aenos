@@ -9,6 +9,16 @@ export const { format: formatDollars } = new Intl.NumberFormat('en-US', {
   currency: 'USD',
 });
 
+export const { format: formatCoins } = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 2,
+});
+
+export const formatStable = (num) => {
+  const formattedNum = formatCoins(num);
+
+  return `${formattedNum} iUSD`;
+};
+
 export const toBigInt = (num, decimals = DEFAULT_DECIMALS) => {
   return Math.floor(num * 10**decimals);
 };
