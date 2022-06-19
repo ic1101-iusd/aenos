@@ -11,8 +11,8 @@ const PositionsTable = ({onSubmit}) => {
         return getColumns();
     }, [])
     const {positions, currentPosition, setCurrentPosition, collateralPrice, closePosition} = useVault();
-    const handleOnClickCheckbox = useCallback((cell) => {
-        const activePosition = positions.find(position => position.id == cell.row.id);
+    const handleOnClickCheckbox = useCallback((id) => {
+        const activePosition = positions.find(position => position.id === id);
         setCurrentPosition(activePosition[0]);
     }, [positions]);
     const handleClose = useCallback((id) => {
@@ -131,7 +131,7 @@ function toActivePosition(cell, handleOnClickCheckbox, currentPosition) {
     return <td><label className="form-control">
         <input type="checkbox" name="checkbox-checked"
                checked={currentPosition?.id === id}
-               onClick={event => handleOnClickCheckbox(cell)}/>
+               onClick={event => handleOnClickCheckbox(id)}/>
     </label>
     </td>
 }
