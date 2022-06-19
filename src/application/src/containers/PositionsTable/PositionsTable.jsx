@@ -4,6 +4,7 @@ import {useVault} from 'Services/vault';
 import formulas from 'Utils/formulas';
 import styles from './PositionsTable.scss';
 import {formatDollars} from 'Utils/formatters';
+import {formatPercent} from 'Utils/formatters';
 import Button from "Components/Button";
 
 const PositionsTable = ({onSubmit}) => {
@@ -69,7 +70,7 @@ function constructTableData(positions, currentPosition, collateralPrice) {
             activePosition: position.id === currentPosition?.id,
             collateralLocked: position.collateralAmount,
             debt: formatDollars(position.stableAmount),
-            collateralRatio: formulas.getCollateralRatio(position.collateralAmount, collateralPrice, position.stableAmount),
+            collateralRatio: formatPercent(formulas.getCollateralRatio(position.collateralAmount, collateralPrice, position.stableAmount)),
             liquidationPrice: formatDollars(formulas.getLiquidationPrice(position.collateralAmount, position.stableAmount)),
             status: defineStatus(position)
         });
