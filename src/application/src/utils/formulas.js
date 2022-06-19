@@ -1,4 +1,4 @@
-const COLLATERAL_INDEX = 1.5;
+const COLLATERAL_INDEX = 1.15;
 
 const formulas = {
   getAvailableDollars(collateralAmount, collateralPrice, collateralRatio) {
