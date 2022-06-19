@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 import config from 'Constants/config';
 import { useWallet } from 'Services/wallet';
@@ -37,7 +38,22 @@ const CoinsProvider = ({ children }) => {
     if (principle) {
       try {
         logger.log('Dropping... 1 BTC');
-        await axios.post(`${ config.SERVER_HOST }/transfer/${ principle.toString() }`);
+
+        await toast.promise(
+          axios.post(`${config.SERVER_HOST}/transfer/${ principle.toString() }`),
+          {
+            pending: '1 BTC dropping',
+            success: '1 BTC dropped',
+            error: {
+              render({ error }) {
+                logger.error('Dropping 1 BTC', error);
+
+                return 'Something went wrong. Try again later.';
+              }
+            },
+          }
+        );
+
         await updateBalances();
 
         logger.log('Dropped 1 BTC');
