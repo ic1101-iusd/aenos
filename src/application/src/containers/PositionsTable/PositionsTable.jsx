@@ -68,7 +68,7 @@ function constructTableData(positions, currentPosition, collateralPrice) {
         positionDataTable.push({
             id: position.id,
             activePosition: position.id === currentPosition?.id,
-            collateralLocked: position.collateralAmount,
+            collateralLocked: position.collateralAmount + " BTC",
             debt: formatDollars(position.stableAmount),
             collateralRatio: formatPercent(formulas.getCollateralRatio(position.collateralAmount, collateralPrice, position.stableAmount)),
             liquidationPrice: formatDollars(formulas.getLiquidationPrice(position.collateralAmount, position.stableAmount)),
