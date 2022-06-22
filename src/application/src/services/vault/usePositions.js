@@ -119,6 +119,7 @@ const usePositions = ({ vaultActor, principle }) => {
       logger.log('res', position);
 
       setCurrentPosition(position);
+      setPositions(current => current.map(p => position.id === p.id ? position : p));
 
       await updateBalances();
     } catch (e) {

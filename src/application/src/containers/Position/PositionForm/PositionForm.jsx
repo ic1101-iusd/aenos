@@ -5,7 +5,7 @@ import cn from 'classnames';
 import Input from 'Components/Input';
 import Button from 'Components/Button';
 import { useCoins } from 'Services/coins';
-import { formatDollars, formatPercent } from 'Utils/formatters';
+import { formatDollars, formatPercent, formatCoins } from 'Utils/formatters';
 import styleVars from 'Styles/variables.scss';
 
 import { ONE_MILLION, MIN_RATIO, DEFAULT_MAX_RATIO } from '../constants';
@@ -47,15 +47,15 @@ const PositionForm = ({
 
   const buttonLabel = useMemo(() => {
     if (stableAmount > 0) {
-      return `Generate ${stableAmount.toFixed(2)} ${iUsd.symbol}`;
+      return `Generate ${formatCoins(stableAmount)} ${iUsd.symbol}`;
     } else if (collateralRatio === 0 && Math.abs(collateralAmount) === currentPosition?.collateralAmount) {
-      return `Repay ${(stableAmount * -1).toFixed(2)} ${iUsd.symbol} & Close position`;
+      return `Repay ${formatCoins(stableAmount * -1)} ${iUsd.symbol} & Close position`;
     } else if (stableAmount < 0) {
-      return `Repay ${(stableAmount * -1).toFixed(2)} ${iUsd.symbol}`;
+      return `Repay ${formatCoins(stableAmount * -1)} ${iUsd.symbol}`;
     } else if (stableAmount === 0 && collateralAmount) {
       return isDeposit ? 'Deposit' : 'Withdraw';
     }
-  }, [stableAmount, collateralAmount, isDeposit, collateralRatio, currentPosition?.collateralAmount]);
+  }, [stableAmount, collateralAmount, isDeposit, collateralRatio, currentPosition?.collateralAmount, iUsd]);
 
   const handleCollateralAmountChange = useCallback((e) => {
     const value = Number(e.target.value) * (isDeposit ? 1 : -1);

@@ -3,6 +3,7 @@
 
 
 .positionsTable table {
+  font-size: 0.8rem;
 }
 
 $gl-ms: "screen and (max-width: 23.5em)"; // up to 360px
@@ -42,7 +43,6 @@ table {
 
   td, th {
     padding-left: 20px;
-    font-size: 22px;
     text-align: left;
     font-weight: bold;
 

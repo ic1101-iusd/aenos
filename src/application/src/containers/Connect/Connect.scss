@@ -5,3 +5,14 @@
   overflow: hidden;
   white-space: nowrap;
 }
+
+.buttons {
+  display: flex;
+  align-items: center;
+}
+
+.drop {
+  font-size: 0.7rem;
+  margin-right: 5px;
+  height: 25px;
+}

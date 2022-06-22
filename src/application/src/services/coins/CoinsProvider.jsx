@@ -1,5 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
+import config from 'Constants/config';
+import { useWallet } from 'Services/wallet';
+import logger from 'Utils/logger';
 import { canisterId as iUsdCanisterId, idlFactory as iUsdIdl } from 'Declarations/mint_token';
 import { canisterId as btcCanisterId, idlFactory as btcIdl } from 'Declarations/fake_btc';
 
@@ -21,12 +26,42 @@ const defaultCoins = [
 
 const CoinsProvider = ({ children }) => {
   const [coins, setCoins] = useState(defaultCoins);
-  // todo: check in mainnet working and maybe add loading
+  const { principle } = useWallet();
 
+  // todo: check in mainnet working and maybe add loading
   const { updateBalances } = useTokenData({
     coins,
     setCoins,
   });
+
+  const dropBtc = useCallback(async () => {
+    if (principle) {
+      try {
+        logger.log('Dropping... 1 BTC');
+
+        await toast.promise(
+          axios.post(`${config.SERVER_HOST}/transfer/${ principle.toString() }`),
+          {
+            pending: '1 BTC dropping',
+            success: '1 BTC dropped',
+            error: {
+              render({ error }) {
+                logger.error('Dropping 1 BTC', error);
+
+                return 'Something went wrong. Try again later.';
+              }
+            },
+          }
+        );
+
+        await updateBalances();
+
+        logger.log('Dropped 1 BTC');
+      } catch (e) {
+        logger.error(e);
+      }
+    }
+  }, [principle, updateBalances]);
 
   const value = useMemo(() => {
     return {
@@ -34,6 +69,7 @@ const CoinsProvider = ({ children }) => {
       updateBalances,
       btc: coins[0],
       iUsd: coins[1],
+      dropBtc,
     };
   }, [coins]);
 

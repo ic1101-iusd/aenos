@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 
 import formulas from 'Utils/formulas';
-import { formatDollars } from 'Utils/formatters';
+import { formatDollars, formatStable } from 'Utils/formatters';
 import { useVault } from 'Services/vault';
 
 import { DEFAULT_STATS, DEFAULT_MAX_RATIO, MIN_RATIO } from './constants';
@@ -129,7 +129,7 @@ const Position = () => {
         <div className={styles.column}>
           <PriceCard
             label="Debt"
-            formatter={formatDollars}
+            formatter={formatStable}
             amount={currentStats.debt}
             afterAmount={nextStats.debt}
           />

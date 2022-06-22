@@ -5,6 +5,7 @@ const CoinsContext = createContext({
   updateBalances: () => {},
   btc: null,
   iUsd: null,
+  dropBtc: () => {},
 });
 
 export default CoinsContext;

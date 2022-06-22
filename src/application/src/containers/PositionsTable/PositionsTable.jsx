@@ -3,7 +3,8 @@ import {useTable} from 'react-table';
 import {useVault} from 'Services/vault';
 import formulas from 'Utils/formulas';
 import styles from './PositionsTable.scss';
-import {formatDollars} from 'Utils/formatters';
+import {formatDollars, formatCoins} from 'Utils/formatters';
+import { useCoins } from 'Services/coins';
 import {formatPercent} from 'Utils/formatters';
 import Button from "Components/Button";
 
@@ -13,19 +14,26 @@ const PositionsTable = ({onSubmit}) => {
         return getColumns();
     }, [])
     const {positions, currentPosition, setCurrentPosition, collateralPrice, closePosition} = useVault();
+    const { iUsd } = useCoins();
     const handleOnClickCheckbox = useCallback((id) => {
         const activePosition = positions.find(position => position.id === id);
-        setCurrentPosition(activePosition[0]);
+        setCurrentPosition(activePosition);
     }, [positions]);
     const handleClose = useCallback((id) => {
-        const activePosition = positions.find(position => position.id === id);
-        setCurrentPosition(activePosition[0]);
-        closePosition(id)
-    }, [positions]);
+        closePosition(id);
+    }, [positions, closePosition]);
 
     const data = React.useMemo(() => {
-        return constructTableData(positions, currentPosition, collateralPrice)
-    }, [positions, currentPosition, setCurrentPosition])
+        return positions.map((position) => ({
+            id: position.id,
+            activePosition: position.id === currentPosition?.id,
+            collateralLocked: `${ position.collateralAmount } BTC`,
+            debt: `${ formatCoins(position.stableAmount) } ${ iUsd.symbol }`,
+            collateralRatio: formatPercent(formulas.getCollateralRatio(position.collateralAmount, collateralPrice, position.stableAmount)),
+            liquidationPrice: formatDollars(formulas.getLiquidationPrice(position.collateralAmount, position.stableAmount)),
+            status: defineStatus(position)
+        }));
+    }, [positions, currentPosition, collateralPrice, iUsd]);
     const {
         getTableProps,
         getTableBodyProps,
@@ -36,13 +44,14 @@ const PositionsTable = ({onSubmit}) => {
         columns,
         data,
     })
+
     return (
         <table {...getTableProps()} className={styles.positionsTable}>
             <thead>
-            {headerGroups.map(headerGroup => (
-                <tr {...headerGroup.getHeaderGroupProps()}>
+            {headerGroups.map((headerGroup, index) => (
+                <tr {...headerGroup.getHeaderGroupProps()} key={index}>
                     {headerGroup.headers.map(column => (
-                        <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                        <th key={column.id} {...column.getHeaderProps()}>{column.render('Header')}</th>
                     ))}
                 </tr>
             ))}
@@ -51,7 +60,7 @@ const PositionsTable = ({onSubmit}) => {
             {rows.map((row, i) => {
                 prepareRow(row)
                 return (
-                    <tr {...row.getRowProps()}>
+                    <tr {...row.getRowProps()} key={i}>
                         {row.cells.map(cell => {
                             return renderCell(cell, currentPosition, handleOnClickCheckbox, handleClose);
                         })}
@@ -61,22 +70,6 @@ const PositionsTable = ({onSubmit}) => {
             </tbody>
         </table>
     )
-}
-
-function constructTableData(positions, currentPosition, collateralPrice) {
-    const positionDataTable = [];
-    positions.forEach((position) => {
-        positionDataTable.push({
-            id: position.id,
-            activePosition: position.id === currentPosition?.id,
-            collateralLocked: position.collateralAmount + " BTC",
-            debt: formatDollars(position.stableAmount),
-            collateralRatio: formatPercent(formulas.getCollateralRatio(position.collateralAmount, collateralPrice, position.stableAmount)),
-            liquidationPrice: formatDollars(formulas.getLiquidationPrice(position.collateralAmount, position.stableAmount)),
-            status: defineStatus(position)
-        });
-    });
-    return positionDataTable;
 }
 
 function getColumns() {
@@ -118,13 +111,15 @@ function renderCell(cell, currentPosition, handleOnClickCheckbox, handleClose) {
         'close': toClose(cell, handleClose, currentPosition),
         'status': toStatus(cell.value, cell)
     }
-    return cellAction[cell.column.id] || <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
+    return cellAction[cell.column.id] || <td key={cell.column.id + cell.row.id} {...cell.getCellProps()}>{cell.render('Cell')}</td>;
 }
 
 function toClose(cell, handleClose, currentPosition) {
-    const id = cell.row.original.id;
+    const { id, status } = cell.row.original;
+    const disabled = status !== 'Active';
+
     return <td><Button onClick={event => handleClose(id)} className={styles.closeButton}
-                       disabled={currentPosition?.id !== id}>
+                       disabled={disabled}>
         Close
     </Button>
     </td>
@@ -136,12 +131,15 @@ function toActivePosition(cell, handleOnClickCheckbox, currentPosition) {
         <input type="checkbox" name="checkbox-checked"
                disabled={cell.row.original.status !== 'Active'}
                checked={currentPosition?.id === id}
-               onClick={event => handleOnClickCheckbox(id)}/>
+               onChange={event => handleOnClickCheckbox(id)}/>
     </label>
     </td>
 }
 
 function defineStatus(position) {
+    if (position.updating) {
+        return 'Updating';
+    }
     if (position.liquidated) {
         return 'Liquidated';
     }
@@ -159,6 +157,8 @@ function toStatus(status, cell) {
             return <td className={styles.Closed}>{cell.render('Cell')}</td>;
         case 'Liquidated':
             return <td className={styles.Liquidated}>{cell.render('Cell')}</td>;
+        case 'Updating':
+            return <td>{cell.render('Cell')}</td>;
     }
 }
 

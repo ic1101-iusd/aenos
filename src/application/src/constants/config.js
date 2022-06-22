@@ -10,4 +10,5 @@ export default {
   canisterIdBtcFt: isDevelopment ? process.env.FAKE_BTC_CANISTER_ID : canisterIcIds.fake_btc.ic,
   isDevelopment,
   HOST,
+  SERVER_HOST: 'https://icp-liquidator.herokuapp.com',
 };
