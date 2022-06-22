@@ -2,6 +2,7 @@ import React from 'react';
 
 import CoinIcon from 'Components/CoinIcon';
 import { useCoins } from 'Services/coins';
+import { formatCoins } from 'Utils/formatters';
 
 import styles from './CoinBalances.scss';
 
@@ -31,7 +32,7 @@ const CoinBalances = () => {
               </div>
             </div>
             <span className={styles.amount}>
-                {coin.balance}
+                {formatCoins(coin.balance ?? 0)}
               </span>
           </div>
         )
