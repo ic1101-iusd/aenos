@@ -34,6 +34,7 @@ const VaultProvider = ({ children }) => {
     updatePosition,
     setCurrentPosition,
     closePosition,
+    selectPosition,
     getAllPositions,
     allPositions,
   } = usePositions({ vaultActor, principle });
@@ -49,6 +50,7 @@ const VaultProvider = ({ children }) => {
       updatePosition,
       setCurrentPosition,
       closePosition,
+      selectPosition,
       allPositions,
       getAllPositions,
       vaultActor,
@@ -60,6 +62,7 @@ const VaultProvider = ({ children }) => {
     positions,
     updatePosition,
     closePosition,
+    selectPosition,
     allPositions,
     getAllPositions,
     vaultActor,

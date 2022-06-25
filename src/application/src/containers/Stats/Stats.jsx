@@ -2,6 +2,8 @@ import React, { useEffect, useMemo } from 'react';
 
 import { useVault } from 'Services/vault';
 import { formatStable, formatBtc, formatDollars } from 'Utils/formatters';
+import PositionsTable from 'Containers/PositionsTable';
+import { statsColumns } from 'Containers/PositionsTable/getColumns';
 
 import styles from './Stats.scss';
 
@@ -83,7 +85,10 @@ const Stats = () => {
         </div>
       </div>
 
-
+      <PositionsTable
+        positions={allPositions}
+        columns={statsColumns}
+      />
     </div>
   )
 };

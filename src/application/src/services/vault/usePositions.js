@@ -207,6 +207,18 @@ const usePositions = ({ vaultActor, principle }) => {
     }
   }, [vaultActor]);
 
+  const selectPosition = useCallback((id) => {
+    // unset current position
+    if (currentPosition?.id === id) {
+      setCurrentPosition(null);
+      return;
+    }
+
+    setCurrentPosition(
+      positions.find(position => position.id === id)
+    );
+  }, [positions, currentPosition]);
+
   useEffect(() => {
     if (principle && vaultActor) {
       getAccountPositions();
@@ -220,6 +232,7 @@ const usePositions = ({ vaultActor, principle }) => {
     updatePosition,
     setCurrentPosition,
     closePosition,
+    selectPosition,
     getAllPositions,
     allPositions,
   };

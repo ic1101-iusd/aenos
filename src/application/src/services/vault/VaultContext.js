@@ -10,6 +10,7 @@ const VaultContext = createContext({
   positions: [],
   currentPosition: null,
   setCurrentPosition: () => {},
+  selectPosition: () => {},
   allPositions: [],
   getAllPositions: () => {},
 });

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { useTable } from 'react-table';
 
 import { useVault } from 'Services/vault';
@@ -7,36 +7,15 @@ import { formatDollars, formatStable } from 'Utils/formatters';
 import { useCoins } from 'Services/coins';
 import { formatPercent } from 'Utils/formatters';
 
-import getColumns from './getColumns';
-
 import styles from './PositionsTable.scss';
 
-const PositionsTable = () => {
-  const { positions, currentPosition, setCurrentPosition, collateralPrice, closePosition } = useVault();
+const PositionsTable = ({ positions, columns }) => {
+  const { currentPosition, collateralPrice } = useVault();
   const { iUsd } = useCoins();
-
-  const handleSelectPosition = useCallback((id) => {
-    // unset current position
-    if (currentPosition?.id === id) {
-      setCurrentPosition(null);
-      return;
-    }
-
-    setCurrentPosition(
-      positions.find(position => position.id === id)
-    );
-  }, [positions, currentPosition]);
-
-  const columns = useMemo(() => {
-    return getColumns({
-      onClose: closePosition,
-      onSelect: handleSelectPosition,
-    });
-  }, [closePosition, handleSelectPosition]);
 
   const data = React.useMemo(() => {
     return positions.map((position) => {
-      const { updating, deleted, liquidated, id, collateralAmount, stableAmount } = position;
+      const { updating, deleted, liquidated, id, collateralAmount, stableAmount, owner } = position;
 
       return {
         ...position,
@@ -46,6 +25,7 @@ const PositionsTable = () => {
         debt: formatStable(stableAmount),
         collateralRatio: formatPercent(formulas.getCollateralRatio(collateralAmount, collateralPrice, stableAmount)),
         liquidationPrice: formatDollars(formulas.getLiquidationPrice(collateralAmount, stableAmount)),
+        owner: owner.toString(),
       };
     });
   }, [positions, currentPosition, collateralPrice, iUsd]);
