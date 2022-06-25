@@ -18,8 +18,10 @@ const Stats = () => {
 
   const stats = useMemo(() => {
     const stats = allPositions.reduce((acc, position) => {
-      acc.totalCollateral += position.collateralAmount;
-      acc.totalDebt += position.stableAmount;
+      if (!(position.liquidated || position.deleted)) {
+        acc.totalCollateral += position.collateralAmount;
+        acc.totalDebt += position.stableAmount;
+      }
       acc.uniqueOwners.add(position.owner.toString());
 
       return acc;
