@@ -1,208 +1,44 @@
 @use 'Styles/variables';
 @use 'Styles/mix';
 
-
-.positionsTable table {
+.positionsTable {
   font-size: 0.8rem;
+  font-weight: bold;
 }
-
-$gl-ms: "screen and (max-width: 23.5em)"; // up to 360px
-$gl-xs: "screen and (max-width: 35.5em)"; // up to 568px
-$gl-sm: "screen and (max-width: 48em)"; // max 768px
-$gl-md: "screen and (max-width: 64em)"; // max 1024px
-$gl-lg: "screen and (max-width: 80em)"; // max 1280px
-
 
 table {
   border-collapse: collapse;
-  background: #13383E;
+  background: variables.$background-secondary-color;
   border-radius: 13px;
-  overflow: hidden;
+  overflow-x: scroll;
   margin: 50px auto;
   position: relative;
 
   width: 80%;
+  min-width: 820px;
 
-  * {
-    position: relative
+  td, th {
+    text-align: left;
+    padding-left: 20px;
+
+    &:first-child {
+      text-align: center;
+    }
   }
 
   thead tr {
     height: 60px;
-    background: #13383E;
   }
 
   tbody tr {
     height: 48px;
-    border-bottom: 1px solid #13383E;
+
+    &:hover {
+      background: variables.$hover-color;
+    }
 
     &:last-child {
-      border: 0;
-    }
-  }
-
-  td, th {
-    padding-left: 20px;
-    text-align: left;
-    font-weight: bold;
-
-    &.l {
-      text-align: right
-    }
-
-    &.c {
-      text-align: center
-    }
-
-    &.r {
-      text-align: center
+      margin-bottom: 20px;
     }
   }
 }
-.Liquidated {
-  color: red !important;
-}
-
-.Active {
-  color: green !important;
-}
-
-.Closed {
-  color: orange !important;
-}
-
-@media #{$gl-xs}              {
-  table {
-    display: block;
-    table-layout: fixed;
-
-    > *, tr, td, th {
-      display: block
-    }
-
-    thead {
-      display: none
-    }
-
-    tbody tr {
-      height: auto;
-      padding: 8px 0;
-
-      td {
-
-        padding-left: 45%;
-        margin-bottom: 12px;
-
-        &:last-child {
-          margin-bottom: 0
-        }
-
-        &:before {
-          position: absolute;
-          font-weight: 700;
-          width: 40%;
-          left: 10px;
-          top: 0
-        }
-      }
-    }
-  }
-  #checkbox-active-position {
-    transform: scale(2);
-  }
-}
-
-:root {
-  --form-control-color: #F47E16;
-}
-
-*,
-*:before,
-*:after {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-form {
-  display: grid;
-  place-content: center;
-  min-height: 100vh;
-}
-
-.form-control {
-  font-family: system-ui, sans-serif;
-  font-size: 2rem;
-  font-weight: bold;
-  line-height: 1.1;
-  display: grid;
-  grid-template-columns: 1em auto;
-  gap: 0.5em;
-}
-
-.form-control + .form-control {
-  margin-top: 1em;
-}
-
-.form-control--disabled {
-  color: var(--form-control-disabled);
-  cursor: not-allowed;
-}
-
-input[type="checkbox"] {
-  -webkit-appearance: none;
-  appearance: none;
-  background-color: var(--form-background);
-  margin: 0;
-
-  font: inherit;
-  color: currentColor;
-  width: 1.50em;
-  height: 1.50em;
-  border: 0.15em solid currentColor;
-  border-radius: 0.15em;
-  transform: translateY(-0.075em);
-
-  display: grid;
-  place-content: center;
-}
-
-input[type="checkbox"]::before {
-  content: "";
-  width: 0.85em;
-  height: 0.85em;
-  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-  transform: scale(0);
-  transform-origin: bottom left;
-  transition: 120ms transform ease-in-out;
-  box-shadow: inset 1em 1em var(--form-control-color);
-  /* Windows High Contrast Mode */
-  background-color: CanvasText;
-}
-
-input[type="checkbox"]:checked::before {
-  transform: scale(1);
-}
-
-input[type="checkbox"]:focus {
-  outline: max(2px, 0.15em) solid currentColor;
-  outline-offset: max(2px, 0.15em);
-}
-
-input[type="checkbox"]:disabled {
-  --form-control-color: var(--form-control-disabled);
-
-  color: var(--form-control-disabled);
-  cursor: not-allowed;
-}
-
-.closeButton {
-  width: 160px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-
