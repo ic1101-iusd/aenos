@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 
 import Header from 'Components/Header';
+import Footer from 'Components/Footer';
 import Stats from 'Containers/Stats';
 import Main from 'Containers/Main';
 
@@ -26,6 +27,8 @@ const App = () => {
           element={<Stats />}
         />
       </Routes>
+
+      <Footer />
     </div>
   )
 };
