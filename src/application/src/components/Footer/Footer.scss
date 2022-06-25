@@ -18,4 +18,8 @@
     color: variables.$text-color !important;
     opacity: 1;
   }
+
+  &:last-child {
+    margin-right: 0;
+  }
 }

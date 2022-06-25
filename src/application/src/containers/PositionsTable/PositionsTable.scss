@@ -36,9 +36,5 @@ table {
     &:hover {
       background: variables.$hover-color;
     }
-
-    &:last-child {
-      margin-bottom: 20px;
-    }
   }
 }
