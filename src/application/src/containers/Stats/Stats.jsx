@@ -1,13 +1,16 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import { useVault } from 'Services/vault';
-import { formatStable, formatBtc, formatDollars } from 'Utils/formatters';
 import PositionsTable from 'Containers/PositionsTable';
 import { statsColumns } from 'Containers/PositionsTable/getColumns';
 
+import Totals from './Totals';
+import Filters from './Filters';
 import styles from './Stats.scss';
 
 const Stats = () => {
+  const [filters, setFilters] = useState({ withActive: true, withLiquidated: true, withClosed: true });
+
   const { allPositions, getAllPositions, vaultActor, collateralPrice } = useVault();
 
   useEffect(() => {
@@ -16,79 +19,37 @@ const Stats = () => {
     }
   }, [vaultActor]);
 
-  const stats = useMemo(() => {
-    const stats = allPositions.reduce((acc, position) => {
-      if (!(position.liquidated || position.deleted)) {
-        acc.totalCollateral += position.collateralAmount;
-        acc.totalDebt += position.stableAmount;
+  const positions = useMemo(() => {
+    return allPositions.filter(({ deleted, liquidated }) => {
+      const active = !(liquidated || deleted);
+      const closed = (deleted && !liquidated);
+
+      if (!filters.withLiquidated && liquidated) {
+        return false;
+      } else if (!filters.withActive && active) {
+        return false;
+      } else if (!filters.withClosed && closed) {
+        return false;
       }
-      acc.uniqueOwners.add(position.owner.toString());
 
-      return acc;
-    }, {
-      totalCollateral: 0,
-      totalDebt: 0,
-      uniqueOwners: new Set(),
+      return true;
     });
-
-    return {
-      ...stats,
-      uniqueOwners: stats.uniqueOwners.size,
-      totalCollateralValue: stats.totalCollateral * collateralPrice,
-      positionAmount: allPositions.length,
-    }
-  }, [allPositions, collateralPrice]);
+  }, [allPositions, filters]);
 
   return (
     <div className={styles.statsWrapper}>
-      <div className={styles.stats}>
-        <div className={styles.stat}>
-          <div className={styles.statLabel}>
-            Total Collateral
-          </div>
+      <Filters
+        filters={filters}
+        setFilters={setFilters}
+      />
 
-          <div className={styles.statValue}>
-            {formatBtc(stats.totalCollateral)}
-
-            <div className={styles.statSubValue}>
-              {formatDollars(stats.totalCollateralValue)}
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.stat}>
-          <div className={styles.statLabel}>
-            Total Debt
-          </div>
-
-          <div className={styles.statValue}>
-            {formatStable(stats.totalDebt)}
-          </div>
-        </div>
-
-        <div className={styles.stat}>
-          <div className={styles.statLabel}>
-            Unique Users
-          </div>
-
-          <div className={styles.statValue}>
-            {stats.uniqueOwners}
-          </div>
-        </div>
-
-        <div className={styles.stat}>
-          <div className={styles.statLabel}>
-            Position Amount
-          </div>
-
-          <div className={styles.statValue}>
-            {stats.positionAmount}
-          </div>
-        </div>
-      </div>
+      <Totals
+        positions={positions}
+        collateralPrice={collateralPrice}
+      />
 
       <PositionsTable
-        positions={allPositions}
+        positions={positions}
         columns={statsColumns}
       />
     </div>

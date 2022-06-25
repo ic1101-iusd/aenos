@@ -3,12 +3,12 @@ import cn from 'classnames';
 
 import styles from './Checkbox.scss';
 
-const Checkbox = ({ disabled, checked, onChange, className }) => {
+const Checkbox = ({ disabled, checked, onChange, className, ...rest }) => {
   return (
     <input
+      {...rest}
       className={cn([styles.checkbox, className])}
       type="checkbox"
-      name="checkbox-checked"
       disabled={disabled}
       checked={checked}
       onChange={onChange}

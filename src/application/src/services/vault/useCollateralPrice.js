@@ -18,7 +18,6 @@ const useCollateralPrice = ({ vaultActor }) => {
 
     setCollateralPrice(fromBigInt(price));
 
-    console.log({ data });
     const date = new Date(data.createdDate);
 
     setCollateralNextPrice({
