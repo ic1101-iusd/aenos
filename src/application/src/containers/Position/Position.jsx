@@ -25,7 +25,6 @@ const Position = () => {
     currentPosition,
     updatePosition,
     closePosition,
-    setCurrentPosition,
   } = useVault();
 
   const currentStats = useMemo(() => {
@@ -163,7 +162,6 @@ const Position = () => {
         setCollateralAmount={setCollateralAmount}
         collateralRatio={collateralRatio}
         setCollateralRatio={setCollateralRatio}
-        collateralPrice={collateralPrice}
         liquidationPrice={nextStats.liquidationPrice}
         stableAmount={nextStats.debt - currentStats.debt}
         onSubmit={handleSubmit}
@@ -173,8 +171,6 @@ const Position = () => {
         isDeposit={isDeposit}
         setIsDeposit={setIsDeposit}
         collateralInputRef={collateralInputRef}
-        currentPosition={currentPosition}
-        setCurrentPosition={setCurrentPosition}
       />
     </div>
   );

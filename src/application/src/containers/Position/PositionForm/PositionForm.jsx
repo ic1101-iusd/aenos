@@ -5,6 +5,7 @@ import cn from 'classnames';
 import Input from 'Components/Input';
 import Button from 'Components/Button';
 import { useCoins } from 'Services/coins';
+import { useVault } from 'Services/vault';
 import { formatDollars, formatPercent, formatCoins } from 'Utils/formatters';
 import styleVars from 'Styles/variables.scss';
 
@@ -17,7 +18,6 @@ const PositionForm = ({
   collateralRatio,
   setCollateralRatio,
   liquidationPrice,
-  collateralPrice,
   stableAmount,
   onSubmit,
   marks,
@@ -26,9 +26,8 @@ const PositionForm = ({
   isDeposit,
   setIsDeposit,
   collateralInputRef,
-  currentPosition,
-  setCurrentPosition,
 }) => {
+  const { setCurrentPosition, collateralPrice, currentPosition } = useVault();
   const { iUsd, btc } = useCoins();
 
   const handleCollateralSign = useCallback(() => {
