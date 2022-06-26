@@ -74,6 +74,7 @@ module.exports = {
       Styles: path.resolve(__dirname, './src/application/src/styles/'),
       Assets: path.resolve(__dirname, './src/application/assets/'),
       Declarations: path.resolve(__dirname, './src/declarations/'),
+      Shared: path.resolve(__dirname, './src/application/src/shared/'),
     },
   },
   output: {
