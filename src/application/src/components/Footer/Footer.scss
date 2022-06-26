@@ -1,0 +1,25 @@
+@use 'Styles/variables';
+
+.footer {
+  display: flex;
+  justify-content: center;
+  margin: 30px;
+}
+
+.link {
+  margin-right: 10px;
+  font-size: 1rem;
+  text-decoration: none;
+  color: variables.$text-secondary-color !important;
+  font-weight: bold;
+  opacity: 0.7;
+
+  &:hover {
+    color: variables.$text-color !important;
+    opacity: 1;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+}

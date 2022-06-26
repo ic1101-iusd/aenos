@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createRoot } from 'react-dom/client';
 import { ToastContainer } from 'react-toastify';
+import { BrowserRouter } from 'react-router-dom';
 
 import { WalletProvider } from 'Services/wallet';
 import { CoinsProvider } from 'Services/coins';
@@ -17,25 +18,25 @@ const container = document.getElementById('app');
 const root = createRoot(container);
 
 root.render(
-  <>
+  <BrowserRouter>
     <WalletProvider>
       <CoinsProvider>
         <VaultProvider>
-          <App />
+            <App />
 
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-          />
+            <ToastContainer
+              position="top-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+            />
         </VaultProvider>
       </CoinsProvider>
     </WalletProvider>
-  </>
+  </BrowserRouter>
 );

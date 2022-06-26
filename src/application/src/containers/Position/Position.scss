@@ -18,6 +18,10 @@
   flex-direction: column;
 }
 
+.collateralNextPriceTime {
+  font-size: 0.7rem;
+}
+
 .lockedAmount {
   @include mix.underline-selection;
 }

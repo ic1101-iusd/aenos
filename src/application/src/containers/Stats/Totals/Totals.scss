@@ -1,0 +1,48 @@
+@use 'Styles/variables';
+
+.totals {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.total {
+  border-right: 2px solid variables.$text-color;
+  background-color: variables.$background-secondary-color;
+  height: 87px;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-weight: bold;
+
+  &:last-child {
+    border-right: none;
+  }
+  &:nth-child(1) {
+    width: 32%;
+  }
+  &:nth-child(2) {
+    width: 32%;
+  }
+  &:nth-child(3) {
+    width: 18%;
+  }
+  &:nth-child(4) {
+    width: 18%;
+  }
+}
+
+.totalLabel {
+  font-size: 1.3rem;
+}
+
+.totalValue {
+  font-size: 2.25rem;
+
+  .totalSubValue {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+}

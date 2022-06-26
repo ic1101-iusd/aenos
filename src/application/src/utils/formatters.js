@@ -10,8 +10,14 @@ export const { format: formatDollars } = new Intl.NumberFormat('en-US', {
 });
 
 export const { format: formatCoins } = new Intl.NumberFormat('en-US', {
-  minimumFractionDigits: 2,
+  minimumFractionDigits: 3,
 });
+
+export const formatBtc = (num) => {
+  const formattedNum = formatCoins(num);
+
+  return `${formattedNum} BTC`;
+};
 
 export const formatStable = (num) => {
   const formattedNum = formatCoins(num);

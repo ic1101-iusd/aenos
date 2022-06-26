@@ -30,6 +30,7 @@ const coinApprove = async (coin, amount, bigIntAmount) => {
 };
 
 const usePositions = ({ vaultActor, principle }) => {
+  const [allPositions, setAllPositions] = useState([]);
   const [positions, setPositions] = useState([]);
   const [currentPosition, setCurrentPosition] = useState(null);
 
@@ -186,6 +187,38 @@ const usePositions = ({ vaultActor, principle }) => {
     }
   }, [currentPosition, updateBalances, btc, iUsd, getAccountPositions]);
 
+  const getAllPositions = useCallback(async () => {
+    try {
+      const lastPositionId = await vaultActor.getLastPositionId();
+
+      const allPositions = (await vaultActor.getPositions(lastPositionId, 0)).map(position => {
+        return {
+          ...position,
+          collateralAmount: fromBigInt(position.collateralAmount),
+          stableAmount: fromBigInt(position.stableAmount),
+        };
+      });
+
+      logger.log({ allPositions });
+
+      setAllPositions(allPositions);
+    } catch (e) {
+      logger.error(e);
+    }
+  }, [vaultActor]);
+
+  const selectPosition = useCallback((id) => {
+    // unset current position
+    if (currentPosition?.id === id) {
+      setCurrentPosition(null);
+      return;
+    }
+
+    setCurrentPosition(
+      positions.find(position => position.id === id)
+    );
+  }, [positions, currentPosition]);
+
   useEffect(() => {
     if (principle && vaultActor) {
       getAccountPositions();
@@ -199,6 +232,9 @@ const usePositions = ({ vaultActor, principle }) => {
     updatePosition,
     setCurrentPosition,
     closePosition,
+    selectPosition,
+    getAllPositions,
+    allPositions,
   };
 };
 

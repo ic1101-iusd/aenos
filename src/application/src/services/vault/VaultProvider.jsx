@@ -34,21 +34,40 @@ const VaultProvider = ({ children }) => {
     updatePosition,
     setCurrentPosition,
     closePosition,
+    selectPosition,
+    getAllPositions,
+    allPositions,
   } = usePositions({ vaultActor, principle });
 
-  const { collateralPrice } = useCollateralPrice({ vaultActor });
+  const { collateralPrice, collateralNextPrice } = useCollateralPrice({ vaultActor });
 
   const value = useMemo(() => {
     return {
       collateralPrice,
+      collateralNextPrice,
       createPosition,
       currentPosition,
       positions,
       updatePosition,
       setCurrentPosition,
       closePosition,
+      selectPosition,
+      allPositions,
+      getAllPositions,
+      vaultActor,
     };
-  }, [collateralPrice, createPosition, currentPosition, positions, updatePosition, closePosition]);
+  }, [
+    collateralPrice,
+    createPosition,
+    currentPosition,
+    positions,
+    updatePosition,
+    closePosition,
+    selectPosition,
+    allPositions,
+    getAllPositions,
+    vaultActor,
+  ]);
 
   return (
     <VaultContext.Provider value={value}>

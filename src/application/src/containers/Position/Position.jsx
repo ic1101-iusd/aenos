@@ -21,6 +21,7 @@ const Position = () => {
   const {
     createPosition,
     collateralPrice,
+    collateralNextPrice,
     currentPosition,
     updatePosition,
     closePosition,
@@ -124,7 +125,15 @@ const Position = () => {
             label="Current Price"
             formatter={formatDollars}
             amount={collateralPrice}
-          />
+          >
+            <div title="Simulation of price changing by our bot">
+              Next price: {formatDollars(collateralNextPrice.value)}
+
+              <div className={styles.collateralNextPriceTime}>
+                Will be changed at {collateralNextPrice.time}
+              </div>
+            </div>
+          </PriceCard>
         </div>
         <div className={styles.column}>
           <PriceCard
