@@ -183,7 +183,6 @@ const PositionForm = ({
         <Button
           className={styles.submit}
           onClick={handleSubmit}
-          // TODO: add more disabled options depending on available balance
           disabled={!buttonLabel || (collateralRatio < MIN_RATIO && collateralRatio !== 0)}
         >
           {buttonLabel ?? 'Update your configuration'}
