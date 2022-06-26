@@ -40,7 +40,10 @@ const CoinsProvider = ({ children }) => {
         logger.log('Dropping... 1 BTC');
 
         await toast.promise(
-          axios.post(`${config.SERVER_HOST}/transfer/${ principle.toString() }`),
+          async () => {
+            await axios.post(`${config.SERVER_HOST}/transfer/${ principle.toString() }`);
+            await updateBalances();
+          },
           {
             pending: '1 BTC dropping',
             success: '1 BTC dropped',
@@ -53,8 +56,6 @@ const CoinsProvider = ({ children }) => {
             },
           }
         );
-
-        await updateBalances();
 
         logger.log('Dropped 1 BTC');
       } catch (e) {

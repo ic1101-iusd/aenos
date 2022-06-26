@@ -35,11 +35,6 @@ const PositionForm = ({
     setIsDeposit(current => !current);
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    onSubmit();
-    setCollateralAmount(defaults.collateralAmount);
-  }, [onSubmit]);
-
   const handleBalanceClick = useCallback(() => {
     setCollateralAmount(btc.balance);
   }, [btc]);
@@ -182,7 +177,7 @@ const PositionForm = ({
       <div className={styles.buttons}>
         <Button
           className={styles.submit}
-          onClick={handleSubmit}
+          onClick={onSubmit}
           disabled={!buttonLabel || (collateralRatio < MIN_RATIO && collateralRatio !== 0)}
         >
           {buttonLabel ?? 'Update your configuration'}
