@@ -13,6 +13,9 @@ const Footer = () => {
       <a target="_blank" href="https://github.com/ic1101-iusd" className={styles.link}>
         Github
       </a>
+      <a target="_blank" href="https://twitter.com/iusd_ic" className={styles.link}>
+        Twitter
+      </a>
       <Link to={`${isHome ? '/stats' : '/'}`} className={styles.link}>
         {isHome ? 'Statistics' : 'Home'}
       </Link>
