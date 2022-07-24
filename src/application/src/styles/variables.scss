@@ -7,6 +7,9 @@ $text-secondary-color: #cbcbcb;
 $primary-color: rgb(247,147,26);
 $red-color: rgba(230, 0, 0, 0.9);
 
+$break-point-desktop: 1200px;
+$break-point-tablet: 768px;
+$break-point-mobile: 420px;
 
 :export {
   primaryColor: $primary-color;

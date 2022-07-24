@@ -9,7 +9,7 @@ import styles from './Header.scss';
 const Header = () => {
   return (
     <div className={styles.header}>
-      <Link to="/">
+      <Link to="/" className={styles.logoLink}>
         <img
           className={styles.logo}
           src={logo}
