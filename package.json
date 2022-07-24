@@ -14,7 +14,7 @@
     "start": "webpack serve --mode development --env development",
     "prestart": "npm run copy:types",
     "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --exclude='*.most' --delete src/declarations",
-    "deploy:application": "dfx canister --network ic install application --mode=reinstall"
+    "deploy:application": "dfx build --network ic application && dfx canister --network ic install application --mode=reinstall"
   },
   "devDependencies": {
     "@dfinity/agent": "0.11.3",
