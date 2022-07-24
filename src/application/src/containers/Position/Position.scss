@@ -1,16 +1,27 @@
 @use 'Styles/mix';
+@use 'Styles/variables';
 
 .position {
   display: flex;
   flex-direction: row;
   width: fit-content;
   margin: auto;
+
+  @media (max-width: variables.$break-point-desktop) {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 .cards {
   display: flex;
   flex-direction: row;
   margin-right: 10px;
+
+  @media (max-width: variables.$break-point-tablet) {
+    flex-direction: column;
+    margin-right: 0;
+  }
 }
 
 .column {

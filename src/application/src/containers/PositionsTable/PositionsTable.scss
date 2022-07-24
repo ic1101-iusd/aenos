@@ -1,9 +1,17 @@
 @use 'Styles/variables';
 @use 'Styles/mix';
 
+.tableWrapper {
+  margin: auto;
+  max-width: 90%;
+  overflow: auto;
+}
+
 .positionsTable {
   font-size: 0.8rem;
   font-weight: bold;
+  width: 100%;
+  min-width: 1000px;
 }
 
 table {

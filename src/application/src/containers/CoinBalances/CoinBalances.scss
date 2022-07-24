@@ -5,6 +5,10 @@
   width: 400px;
   margin: 20px auto;
 
+  @media (max-width: variables.$break-point-mobile) {
+    width: unset;
+  }
+
   @include mix.card;
 }
 
