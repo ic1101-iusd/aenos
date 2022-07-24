@@ -18,6 +18,7 @@ const VaultProvider = ({ children }) => {
         canisterId: vaultCanisterId,
         interfaceFactory: vaultIdl,
       });
+      console.log({ vaultActor });
 
       setVaultActor(vaultActor);
     };
