@@ -1,7 +1,4 @@
 import { useEffect, useCallback, useState } from 'react';
-import { AuthClient } from "@dfinity/auth-client";
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { idlFactory } from 'Declarations/protocol';
 
 import logger from 'Utils/logger';
 import config from 'Constants/config';
@@ -18,28 +15,6 @@ const useConnect = ({ plug }) => {
   const [isConnecting, setIsConnecting] = useState(false);
 
   const connect = useCallback(async () => {
-    // const authClient = await AuthClient.create();
-    //
-    // authClient.login({
-    //   // 7 days in nanoseconds
-    //   maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
-    //   onSuccess: async (ss) => {
-    //     console.log('login success', authClient, ss);
-    //
-    //     const identity = await authClient.getIdentity();
-    //     // const actor = Actor.createActor(idlFactory, {
-    //     //   agent: new HttpAgent({
-    //     //     identity,
-    //     //   }),
-    //     //   canisterId: config.canisterIdVault,
-    //     // });
-    //
-    //     console.log({ identity });
-    //   },
-    // });
-    //
-    // return;
-
     if (!plug.current) {
       window.open('https://plugwallet.ooo/','_blank');
       return;
@@ -74,14 +49,6 @@ const useConnect = ({ plug }) => {
   useEffect(() => {
     const verifyConnectionAndAgent = async () => {
       setIsConnecting(true);
-      //
-      // const authClient = await AuthClient.create();
-      //
-      // const identity = await authClient.getIdentity();
-      //
-      // console.log({ identity, principle: identity.getPrincipal().toString() });
-      //
-      // return;
 
       try {
         if (!window.ic.plug) return;

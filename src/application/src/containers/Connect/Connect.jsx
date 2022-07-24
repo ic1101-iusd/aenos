@@ -30,7 +30,6 @@ const Connect = () => {
           {isHome ? 'Stats' : 'Home'}
         </Button>
       </Link>
-
       {isLoggedIn && (
         <Button
           className={styles.drop}
@@ -39,7 +38,6 @@ const Connect = () => {
           Get 1 BTC
         </Button>
       )}
-
       <Button
         className={styles.connectBtn}
         onClick={connectHandler}
