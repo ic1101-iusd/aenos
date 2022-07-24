@@ -1,4 +1,4 @@
-# IC1101 - USB stablecoin
+# IC1101 - iUSD stablecoin
 
 ## Local run
 ````

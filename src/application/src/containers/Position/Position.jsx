@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 
 import formulas from 'Utils/formulas';
 import { formatDollars, formatStable } from 'Utils/formatters';
@@ -9,14 +9,24 @@ import PriceCard from './PriceCard';
 import PositionForm from './PositionForm';
 import styles from './Position.scss';
 
+export const defaults = {
+  collateralAmount: '',
+  collateralRatio: DEFAULT_MAX_RATIO,
+  maxRatio: DEFAULT_MAX_RATIO,
+  minRatio: MIN_RATIO,
+};
+
 const Position = () => {
-  const [collateralAmount, setCollateralAmount] = useState(0);
+  const [collateralAmount, setCollateralAmount] = useState(defaults.collateralAmount);
   // default 1000% (low risk)
-  const [collateralRatio, setCollateralRatio] = useState(DEFAULT_MAX_RATIO);
-  const [maxRatio, setMaxRatio] = useState(DEFAULT_MAX_RATIO);
-  const [minRatio, setMinRatio] = useState(MIN_RATIO);
+  const [collateralRatio, setCollateralRatio] = useState(defaults.collateralRatio);
+  const [maxRatio, setMaxRatio] = useState(defaults.maxRatio);
+  const [minRatio, setMinRatio] = useState(defaults.minRatio);
   const [isDeposit, setIsDeposit] = useState(true);
-  const collateralInputRef = useRef();
+
+  const colAmountNumber = useMemo(() => {
+    return Number(collateralAmount) * (isDeposit ? 1 : -1);
+  }, [isDeposit, collateralAmount]);
 
   const {
     createPosition,
@@ -25,8 +35,16 @@ const Position = () => {
     currentPosition,
     updatePosition,
     closePosition,
-    setCurrentPosition,
   } = useVault();
+
+  useEffect(() => {
+    if (!currentPosition) {
+      setCollateralRatio(defaults.collateralRatio);
+    }
+    setCollateralAmount(defaults.collateralAmount);
+    setMaxRatio(defaults.maxRatio);
+    setMinRatio(defaults.minRatio);
+  }, [currentPosition]);
 
   const currentStats = useMemo(() => {
     if (!currentPosition || !collateralPrice || currentPosition.collateralAmount === 0) {
@@ -43,11 +61,12 @@ const Position = () => {
       debt: Number(currentPosition.stableAmount.toFixed(5)),
       collateralLocked: currentPosition.collateralAmount,
       collateralLockedUsd: currentPosition.collateralAmount * collateralPrice,
+      collateralRatio,
     };
   }, [currentPosition, collateralPrice]);
 
   const nextStats = useMemo(() => {
-    const totalCollateralAmount = Number(collateralAmount) + currentStats.collateralLocked;
+    const totalCollateralAmount = colAmountNumber + currentStats.collateralLocked;
 
     const debt = formulas.getAvailableDollars(totalCollateralAmount, collateralPrice, collateralRatio);
     const liquidationPrice = formulas.getLiquidationPrice(totalCollateralAmount, debt);
@@ -57,17 +76,17 @@ const Position = () => {
       debt: Number(debt.toFixed(5)),
       collateralLockedUsd: totalCollateralAmount * collateralPrice,
     };
-  }, [collateralAmount, collateralRatio, collateralPrice, currentStats]);
+  }, [colAmountNumber, collateralRatio, collateralPrice, currentStats]);
 
   const marks = useMemo(() => {
-    if (!collateralAmount || !currentStats.collateralLocked) return {};
+    if (!colAmountNumber || !currentStats.collateralLocked) return {};
 
-    const totalCollateralAmount = Number(collateralAmount) + currentStats.collateralLocked;
+    const totalCollateralAmount = colAmountNumber + currentStats.collateralLocked;
 
     const noGenerateCollateralRatio = formulas.getCollateralRatio(totalCollateralAmount, collateralPrice, currentStats.debt);
 
     setCollateralRatio(noGenerateCollateralRatio);
-    if (maxRatio < noGenerateCollateralRatio) {
+    if (DEFAULT_MAX_RATIO < noGenerateCollateralRatio) {
       setMaxRatio(noGenerateCollateralRatio);
     }
     if (minRatio > noGenerateCollateralRatio && noGenerateCollateralRatio >= 0) {
@@ -82,33 +101,28 @@ const Position = () => {
         label: isDeposit ? 'Deposit' : 'Withdraw',
       },
     };
-  }, [collateralAmount]);
-
-  useEffect(() => {
-    setCollateralAmount(current => current * -1);
-  }, [isDeposit]);
+  }, [colAmountNumber]);
 
   const handleSubmit = useCallback(async () => {
     if (currentPosition) {
       // when collateralRatio == 0 it means we're withdrawing the whole locked collateral -> we're closing position
-      if (collateralRatio === 0 && Math.abs(collateralAmount) === currentPosition.collateralAmount) {
+      if (collateralRatio === 0 && Math.abs(colAmountNumber) === currentPosition.collateralAmount) {
         await closePosition(currentPosition.id);
 
         setCollateralRatio(DEFAULT_MAX_RATIO);
       } else {
-        await updatePosition(currentPosition.id, collateralAmount, nextStats.debt - currentStats.debt);
+        await updatePosition(currentPosition.id, colAmountNumber, nextStats.debt - currentStats.debt);
       }
     } else {
-      await createPosition(collateralAmount, nextStats.debt);
+      await createPosition(colAmountNumber, nextStats.debt);
     }
 
-    setCollateralAmount(0);
-  }, [nextStats, collateralAmount, currentPosition]);
+    setCollateralAmount(defaults.collateralAmount);
+  }, [nextStats, colAmountNumber, currentPosition, isDeposit, closePosition, updatePosition, createPosition]);
 
   const handleLockedCollateralSet = useCallback(() => {
     setCollateralAmount(currentStats.collateralLocked);
     setIsDeposit(false);
-    collateralInputRef.current.value = currentStats.collateralLocked;
   }, [currentStats.collateralLocked]);
 
   return (
@@ -163,7 +177,6 @@ const Position = () => {
         setCollateralAmount={setCollateralAmount}
         collateralRatio={collateralRatio}
         setCollateralRatio={setCollateralRatio}
-        collateralPrice={collateralPrice}
         liquidationPrice={nextStats.liquidationPrice}
         stableAmount={nextStats.debt - currentStats.debt}
         onSubmit={handleSubmit}
@@ -172,9 +185,7 @@ const Position = () => {
         minRatio={minRatio}
         isDeposit={isDeposit}
         setIsDeposit={setIsDeposit}
-        collateralInputRef={collateralInputRef}
-        currentPosition={currentPosition}
-        setCurrentPosition={setCurrentPosition}
+        currentStats={currentStats}
       />
     </div>
   );

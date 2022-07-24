@@ -42,6 +42,7 @@ const PositionsTable = ({ positions, columns }) => {
   });
 
   return (
+    <div className={styles.tableWrapper}>
     <table {...getTableProps()} className={styles.positionsTable}>
       <thead>
         {headerGroups.map((headerGroup, index) => (
@@ -73,6 +74,7 @@ const PositionsTable = ({ positions, columns }) => {
         })}
       </tbody>
     </table>
+    </div>
   );
 };
 

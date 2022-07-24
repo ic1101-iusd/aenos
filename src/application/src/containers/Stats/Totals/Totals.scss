@@ -5,10 +5,13 @@
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
+
+  @media (max-width: variables.$break-point-desktop) {
+    flex-direction: column;
+  }
 }
 
 .total {
-  border-right: 2px solid variables.$text-color;
   background-color: variables.$background-secondary-color;
   height: 87px;
   width: 100%;
@@ -17,20 +20,33 @@
   align-items: center;
   font-weight: bold;
 
-  &:last-child {
-    border-right: none;
+  @media (min-width: variables.$break-point-desktop) {
+    border-right: 2px solid variables.$text-color;
+
+    &:last-child {
+      border-right: none;
+    }
+    &:nth-child(1) {
+      width: 32%;
+    }
+    &:nth-child(2) {
+      width: 32%;
+    }
+    &:nth-child(3) {
+      width: 18%;
+    }
+    &:nth-child(4) {
+      width: 18%;
+    }
   }
-  &:nth-child(1) {
-    width: 32%;
-  }
-  &:nth-child(2) {
-    width: 32%;
-  }
-  &:nth-child(3) {
-    width: 18%;
-  }
-  &:nth-child(4) {
-    width: 18%;
+
+  @media (max-width: variables.$break-point-desktop) {
+    border-bottom: 2px solid variables.$text-color;
+    width: 100%;
+
+    &:last-child {
+      border-bottom: none;
+    }
   }
 }
 

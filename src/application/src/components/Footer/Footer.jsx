@@ -13,10 +13,13 @@ const Footer = () => {
       <a target="_blank" href="https://github.com/ic1101-iusd" className={styles.link}>
         Github
       </a>
+      <a target="_blank" href="https://twitter.com/iusd_ic" className={styles.link}>
+        Twitter
+      </a>
       <Link to={`${isHome ? '/stats' : '/'}`} className={styles.link}>
         {isHome ? 'Statistics' : 'Home'}
       </Link>
-      <a href="mailto:ihor.verkhohliad@gmail.com" className={styles.link}>
+      <a href="mailto:ic1101.iusd@gmail.com" className={styles.link}>
         Write feedback
       </a>
     </div>
