@@ -5,10 +5,12 @@ import cn from 'classnames';
 import Input from 'Components/Input';
 import Button from 'Components/Button';
 import { useCoins } from 'Services/coins';
+import { useVault } from 'Services/vault';
 import { formatDollars, formatPercent, formatCoins } from 'Utils/formatters';
 import styleVars from 'Styles/variables.scss';
 
-import { ONE_MILLION, MIN_RATIO, DEFAULT_MAX_RATIO } from '../constants';
+import { defaults } from '../Position';
+import { MIN_RATIO, DEFAULT_MAX_RATIO } from '../constants';
 import styles from './PositionForm.scss';
 
 const PositionForm = ({
@@ -17,7 +19,6 @@ const PositionForm = ({
   collateralRatio,
   setCollateralRatio,
   liquidationPrice,
-  collateralPrice,
   stableAmount,
   onSubmit,
   marks,
@@ -25,29 +26,23 @@ const PositionForm = ({
   minRatio,
   isDeposit,
   setIsDeposit,
-  collateralInputRef,
-  currentPosition,
-  setCurrentPosition,
+  currentStats,
 }) => {
+  const { selectPosition, collateralPrice, currentPosition } = useVault();
   const { iUsd, btc } = useCoins();
 
   const handleCollateralSign = useCallback(() => {
     setIsDeposit(current => !current);
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    onSubmit();
-    collateralInputRef.current.value = '';
-  }, [onSubmit]);
-
   const handleBalanceClick = useCallback(() => {
     setCollateralAmount(btc.balance);
-    collateralInputRef.current.value = btc.balance;
   }, [btc]);
 
   const buttonLabel = useMemo(() => {
     if (stableAmount > 0) {
       return `Generate ${formatCoins(stableAmount)} ${iUsd.symbol}`;
+      // when collateralRatio == 0 it means we're withdrawing the whole locked collateral -> we're closing position
     } else if (collateralRatio === 0 && Math.abs(collateralAmount) === currentPosition?.collateralAmount) {
       return `Repay ${formatCoins(stableAmount * -1)} ${iUsd.symbol} & Close position`;
     } else if (stableAmount < 0) {
@@ -57,15 +52,24 @@ const PositionForm = ({
     }
   }, [stableAmount, collateralAmount, isDeposit, collateralRatio, currentPosition?.collateralAmount, iUsd]);
 
-  const handleCollateralAmountChange = useCallback((e) => {
-    const value = Number(e.target.value) * (isDeposit ? 1 : -1);
+  const handleCollateralAmountChange = useCallback((ev) => {
+    const { value } = ev.target;
+
+    if (!value) {
+      setCollateralAmount(defaults.collateralAmount);
+      setCollateralRatio(currentStats.collateralRatio ?? DEFAULT_MAX_RATIO);
+      return;
+    }
+
+    if (value < 0 || (value > btc.balance && isDeposit) || (value > currentStats.collateralLocked && !isDeposit)) {
+      return;
+    }
 
     setCollateralAmount(value);
-  }, [isDeposit]);
+  }, [isDeposit, currentStats.collateralRatio, btc.balance, currentStats.collateralLocked, isDeposit]);
 
   const unsetCurrentPosition = useCallback(() => {
-    setCurrentPosition(null);
-    setCollateralRatio(DEFAULT_MAX_RATIO);
+    selectPosition(null);
   }, []);
 
   return (
@@ -103,11 +107,11 @@ const PositionForm = ({
         </div>
         <Input
           className={styles.input}
+          value={collateralAmount}
           onChange={handleCollateralAmountChange}
           placeholder="0.00"
-          max={ONE_MILLION}
+          max={btc.balance}
           type="number"
-          ref={collateralInputRef}
         />
         <div className={styles.usdAmount}>
           ~{formatDollars(collateralPrice)}
@@ -173,8 +177,7 @@ const PositionForm = ({
       <div className={styles.buttons}>
         <Button
           className={styles.submit}
-          onClick={handleSubmit}
-          // TODO: add more disabled options depending on available balance
+          onClick={onSubmit}
           disabled={!buttonLabel || (collateralRatio < MIN_RATIO && collateralRatio !== 0)}
         >
           {buttonLabel ?? 'Update your configuration'}

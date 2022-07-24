@@ -176,7 +176,7 @@ const usePositions = ({ vaultActor, principle }) => {
         }
       );
 
-      console.log({ res });
+      logger.log({ res });
 
       setCurrentPosition(null);
 
@@ -208,6 +208,10 @@ const usePositions = ({ vaultActor, principle }) => {
   }, [vaultActor]);
 
   const selectPosition = useCallback((id) => {
+    if (id === null) {
+      setCurrentPosition(null);
+    }
+
     // unset current position
     if (currentPosition?.id === id) {
       setCurrentPosition(null);
@@ -230,7 +234,6 @@ const usePositions = ({ vaultActor, principle }) => {
     positions,
     currentPosition,
     updatePosition,
-    setCurrentPosition,
     closePosition,
     selectPosition,
     getAllPositions,

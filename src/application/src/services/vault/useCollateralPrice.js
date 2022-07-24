@@ -22,7 +22,7 @@ const useCollateralPrice = ({ vaultActor }) => {
 
     setCollateralNextPrice({
       value: data.price,
-      time: `${date.getHours()}:${date.getMinutes()}`,
+      time: date.toLocaleTimeString(),
     });
   }, [vaultActor]);
 

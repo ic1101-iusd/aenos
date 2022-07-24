@@ -1,4 +1,3 @@
-export const ONE_MILLION = 10**6;
 export const MIN_RATIO = 1.2;
 export const DEFAULT_MAX_RATIO = 10;
 export const DEFAULT_STATS = {
