@@ -57,7 +57,7 @@ module.exports = {
     minimizer: [new TerserPlugin()],
   },
   resolve: {
-    extensions: [".js", ".ts", ".jsx", ".tsx"],
+    extensions: [".js", ".jsx"],
     fallback: {
       assert: require.resolve("assert/"),
       buffer: require.resolve("buffer/"),
@@ -83,7 +83,7 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.(js|ts)x?$/, loader: "ts-loader" },
+      { test: /\.(js)x?$/, loader: "ts-loader", exclude: /node_modules/, options: { transpileOnly: true } },
       {
         test: /\.(s[ac]|c)ss$/i,
         use: [
@@ -152,7 +152,6 @@ module.exports = {
         },
       },
     },
-    hot: true,
     historyApiFallback: true,
     watchFiles: [path.resolve(__dirname, "src", frontendDirectory)],
     liveReload: true,
