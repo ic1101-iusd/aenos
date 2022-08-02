@@ -32,7 +32,7 @@ const CoinBalances = () => {
               </div>
             </div>
             <span className={styles.amount}>
-                {formatCoins(coin.balance ?? 0)}
+                {typeof coin.balance === 'number' ? formatCoins(coin.balance) : coin.balance}
               </span>
           </div>
         )

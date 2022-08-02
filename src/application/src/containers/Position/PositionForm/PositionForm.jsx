@@ -61,6 +61,10 @@ const PositionForm = ({
       return;
     }
 
+    if (typeof btc.balance === 'string') {
+      // possibility for not logged-in user to "try"
+      setCollateralAmount(value);
+    }
     if (value < 0 || (value > btc.balance && isDeposit) || (value > currentStats.collateralLocked && !isDeposit)) {
       return;
     }

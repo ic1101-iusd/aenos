@@ -18,9 +18,9 @@
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
   "devDependencies": {
-    "@dfinity/agent": "0.11.3",
-    "@dfinity/candid": "0.11.3",
-    "@dfinity/principal": "0.11.3",
+    "@dfinity/agent": "0.12.2",
+    "@dfinity/candid": "0.12.2",
+    "@dfinity/principal": "0.12.2",
     "@svgr/webpack": "^6.2.1",
     "@types/chai": "^4.3.1",
     "@types/mocha": "^9.1.1",
@@ -59,6 +59,9 @@
     "last 2 edge version"
   ],
   "dependencies": {
+    "@dfinity/auth-client": "^0.12.2",
+    "@dfinity/authentication": "^0.12.2",
+    "@dfinity/identity": "^0.12.2",
     "axios": "^0.27.2",
     "classnames": "^2.3.1",
     "memoizee": "^0.4.15",

@@ -1,12 +1,12 @@
 import { createContext } from 'react';
 
 const WalletContext = createContext({
-  plug: null,
   principle: '',
   isLoggedIn: false,
   isConnecting: false,
   connect: () => {},
   disconnect: () => {},
+  createActor: () => {},
 });
 
 export default WalletContext;
