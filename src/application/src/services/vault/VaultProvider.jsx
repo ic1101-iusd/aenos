@@ -19,7 +19,6 @@ const VaultProvider = ({ children }) => {
       setVaultActor(vaultActor);
     };
 
-    // todo: check condition without plug
     initVaultActor();
   }, [principle]);
 

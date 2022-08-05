@@ -12,8 +12,10 @@ const useConnect = () => {
     try {
       const p = await wallets[wallet].connect();
 
-      setPrinciple(p);
-      localStorage.setItem(SIGNED_WALLET_STORAGE_KEY, wallet);
+      if (p) {
+        setPrinciple(p);
+        localStorage.setItem(SIGNED_WALLET_STORAGE_KEY, wallet);
+      }
     } catch (err) {
       logger.error(err);
     }
@@ -27,6 +29,8 @@ const useConnect = () => {
 
     try {
       wallets[wallet].disconnect();
+
+      setPrinciple(null);
     } catch (err) {
       logger.error(err);
     }

@@ -1,9 +1,9 @@
-import * as plug from './plug';
-import * as identity from './internetIdentity';
+import plug from './Plug';
+import internetIdentity from './InternetIdentity';
 
 import { WALLETS } from 'Constants/common';
 
 export default {
   [WALLETS.plug]: plug,
-  [WALLETS.identity]: identity,
+  [WALLETS.identity]: internetIdentity,
 };

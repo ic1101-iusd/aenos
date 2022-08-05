@@ -130,6 +130,11 @@ const usePositions = ({ vaultActor, principle }) => {
 
   const getAccountPositions = useCallback(async () => {
     try {
+      if (!principle) {
+        setPositions([]);
+        return;
+      }
+
       const positions = (await vaultActor.getAccountPositions(principle)).map(position => {
         return {
           ...position,
@@ -224,10 +229,10 @@ const usePositions = ({ vaultActor, principle }) => {
   }, [positions, currentPosition]);
 
   useEffect(() => {
-    if (principle && vaultActor) {
+    if (vaultActor) {
       getAccountPositions();
     }
-  }, [vaultActor]);
+  }, [vaultActor, principle]);
 
   return {
     createPosition,

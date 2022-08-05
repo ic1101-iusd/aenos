@@ -60,7 +60,6 @@ const useTokenData = ({ coins, setCoins }) => {
   }, [coins, principle]);
 
   useEffect(() => {
-    // todo: check condition without plug
     initTokenData(principle);
   }, [principle]);
 

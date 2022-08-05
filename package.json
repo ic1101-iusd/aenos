@@ -15,6 +15,7 @@
     "prestart": "npm run copy:types",
     "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --exclude='*.most' --delete src/declarations",
     "deploy:application": "dfx build --network ic application && dfx canister --network ic install application --mode=reinstall",
+    "deploy:internet-identity": "sh ./scripts/download-did-and-wasm && dfx canister deploy internet-identity",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
   "devDependencies": {
@@ -68,6 +69,7 @@
     "rc-slider": "^10.0.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
+    "react-modal": "^3.15.1",
     "react-router-dom": "^6.3.0",
     "react-table": "^7.8.0",
     "react-toastify": "^9.0.4"
