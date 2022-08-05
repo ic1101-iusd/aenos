@@ -41,7 +41,7 @@ const CoinsProvider = ({ children }) => {
 
         await toast.promise(
           async () => {
-            await axios.post(`${config.SERVER_HOST}/transfer/${ principle.toString() }`);
+            await axios.post(`${config.SERVER_HOST}/transfer/${principle.toString()}`);
             await updateBalances();
           },
           {

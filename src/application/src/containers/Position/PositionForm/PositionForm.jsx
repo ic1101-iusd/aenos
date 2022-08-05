@@ -39,6 +39,8 @@ const PositionForm = ({
     setCollateralAmount(btc.balance);
   }, [btc]);
 
+  const anonUser = typeof btc.balance === 'string';
+
   const buttonLabel = useMemo(() => {
     if (stableAmount > 0) {
       return `Generate ${formatCoins(stableAmount)} ${iUsd.symbol}`;
@@ -61,12 +63,16 @@ const PositionForm = ({
       return;
     }
 
+    if (anonUser) {
+      // possibility for not logged-in user to "try"
+      setCollateralAmount(value);
+    }
     if (value < 0 || (value > btc.balance && isDeposit) || (value > currentStats.collateralLocked && !isDeposit)) {
       return;
     }
 
     setCollateralAmount(value);
-  }, [isDeposit, currentStats.collateralRatio, btc.balance, currentStats.collateralLocked, isDeposit]);
+  }, [isDeposit, currentStats.collateralRatio, btc.balance, currentStats.collateralLocked, isDeposit, anonUser]);
 
   const unsetCurrentPosition = useCallback(() => {
     selectPosition(null);
@@ -178,7 +184,7 @@ const PositionForm = ({
         <Button
           className={styles.submit}
           onClick={onSubmit}
-          disabled={!buttonLabel || (collateralRatio < MIN_RATIO && collateralRatio !== 0)}
+          disabled={!buttonLabel || (collateralRatio < MIN_RATIO && collateralRatio !== 0) || anonUser}
         >
           {buttonLabel ?? 'Update your configuration'}
         </Button>

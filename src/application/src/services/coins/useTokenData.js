@@ -14,17 +14,14 @@ const getMetadata = memoize((actor, coin) => {
 });
 
 const useTokenData = ({ coins, setCoins }) => {
-  const { principle, plug } = useWallet();
+  const { principle, createActor } = useWallet();
 
   const initTokenData = useCallback(async (principle) => {
     try {
       const mergedCoins = [];
 
       for (let i = 0; i < coins.length; i++) {
-        const actor = await plug.current.createActor({
-          canisterId: coins[i].canisterId,
-          interfaceFactory: coins[i].idl,
-        });
+        const actor = await createActor(coins[i].idl, coins[i].canisterId);
 
         const metaData = await getMetadata(actor, coins[i]);
         let balance = null;
@@ -63,9 +60,7 @@ const useTokenData = ({ coins, setCoins }) => {
   }, [coins, principle]);
 
   useEffect(() => {
-    if (principle && plug.current) {
-      initTokenData(principle);
-    }
+    initTokenData(principle);
   }, [principle]);
 
   return {

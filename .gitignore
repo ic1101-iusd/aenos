@@ -16,4 +16,7 @@ dist/
 
 declarations/
 .env
-recreate_branch.sh 
+recreate_branch.sh
+
+internet_identity.did
+internet_identity.wasm

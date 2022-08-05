@@ -23,5 +23,5 @@
     }
   },
   "include": ["tests/**/*"],
-  "exclude": ["node_modules", "build", "dist", "src/**/*.js", "src/**/*.jsx"]
+  "exclude": ["node_modules", "build", "dist", "src"]
 }

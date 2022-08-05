@@ -1,49 +1,50 @@
 import { useEffect, useCallback, useState } from 'react';
 
 import logger from 'Utils/logger';
-import config from 'Constants/config';
-import { PRINCIPLE_KEY } from 'Constants/storageKeys';
+import { SIGNED_WALLET_STORAGE_KEY, WALLETS } from 'Constants/common';
+import wallets from 'Services/wallet/wallets';
 
-export const whitelist = [
-  config.canisterIdVault,
-  config.canisterIdUsbFt,
-  config.canisterIdBtcFt,
-];
-
-const useConnect = ({ plug }) => {
+const useConnect = () => {
   const [principle, setPrinciple] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  const connect = useCallback(async () => {
-    if (!plug.current) {
-      window.open('https://plugwallet.ooo/','_blank');
-      return;
+  const connect = useCallback(async (wallet) => {
+    try {
+      const p = await wallets[wallet].connect();
+
+      if (p) {
+        setPrinciple(p);
+        localStorage.setItem(SIGNED_WALLET_STORAGE_KEY, wallet);
+      }
+    } catch (err) {
+      logger.error(err);
     }
-
-    const connected = await plug.current.requestConnect({
-      whitelist,
-      host: config.HOST,
-    });
-
-    if (!connected) return;
-
-    if (!plug.current.agent) {
-      await plug.current.createAgent({
-        whitelist,
-        host: config.HOST,
-      });
-    }
-
-    const p = await plug.current.agent.getPrincipal();
-
-    setPrinciple(p);
-    localStorage.setItem(PRINCIPLE_KEY, p.toString());
   }, []);
 
   const disconnect = useCallback(() => {
-    plug.current.disconnect();
     setPrinciple(null);
-    localStorage.removeItem(PRINCIPLE_KEY);
+
+    const wallet = localStorage.getItem(SIGNED_WALLET_STORAGE_KEY);
+    localStorage.removeItem(SIGNED_WALLET_STORAGE_KEY);
+
+    try {
+      wallets[wallet].disconnect();
+
+      setPrinciple(null);
+    } catch (err) {
+      logger.error(err);
+    }
+  }, []);
+
+  const createActor = useCallback(async (idlFactory, canisterId) => {
+    try {
+      // default - anonymous identity for getting on-chain info for not logged-in user
+      const wallet = localStorage.getItem(SIGNED_WALLET_STORAGE_KEY) ?? WALLETS.identity;
+
+      return wallets[wallet].createActor(idlFactory, canisterId);
+    } catch (err) {
+      logger.error(err);
+    }
   }, []);
 
   useEffect(() => {
@@ -51,32 +52,16 @@ const useConnect = ({ plug }) => {
       setIsConnecting(true);
 
       try {
-        if (!window.ic.plug) return;
+        const wallet = localStorage.getItem(SIGNED_WALLET_STORAGE_KEY);
 
-        plug.current = window.ic.plug;
+        if (!wallet) return;
 
-        const storedPrinciple = localStorage.getItem(PRINCIPLE_KEY);
+        const p = await wallets[wallet].getPrincipal();
 
-        // todo: comment temporary, maybe remove later
-        // if (storedPrinciple) {
-        //   setPrinciple(Principal.fromText(storedPrinciple));
-        //   return;
-        // }
-
-        const connected = await plug.current.isConnected();
-
-        if (connected && !plug.current.agent) {
-          await plug.current.createAgent({
-            whitelist,
-            host: config.HOST,
-          });
-        }
-
-        if (connected && plug.current.agent) {
-          const p = await plug.current.agent.getPrincipal();
-
+        if (p) {
           setPrinciple(p);
-          localStorage.setItem(PRINCIPLE_KEY, p.toString());
+        } else {
+          localStorage.removeItem(SIGNED_WALLET_STORAGE_KEY);
         }
       } catch(e) {
         logger.error(e);
@@ -93,6 +78,7 @@ const useConnect = ({ plug }) => {
     principle,
     connect,
     disconnect,
+    createActor,
   };
 };
 

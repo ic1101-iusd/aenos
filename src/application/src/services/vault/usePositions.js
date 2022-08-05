@@ -130,6 +130,12 @@ const usePositions = ({ vaultActor, principle }) => {
 
   const getAccountPositions = useCallback(async () => {
     try {
+      if (!principle) {
+        setPositions([]);
+        setCurrentPosition(null);
+        return;
+      }
+
       const positions = (await vaultActor.getAccountPositions(principle)).map(position => {
         return {
           ...position,
@@ -178,7 +184,9 @@ const usePositions = ({ vaultActor, principle }) => {
 
       logger.log({ res });
 
-      setCurrentPosition(null);
+      if (currentPosition?.id === id) {
+        setCurrentPosition(null);
+      }
 
       await updateBalances();
       await getAccountPositions();
@@ -224,10 +232,10 @@ const usePositions = ({ vaultActor, principle }) => {
   }, [positions, currentPosition]);
 
   useEffect(() => {
-    if (principle && vaultActor) {
+    if (vaultActor) {
       getAccountPositions();
     }
-  }, [vaultActor]);
+  }, [vaultActor, principle]);
 
   return {
     createPosition,

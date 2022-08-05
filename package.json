@@ -15,12 +15,13 @@
     "prestart": "npm run copy:types",
     "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --exclude='*.most' --delete src/declarations",
     "deploy:application": "dfx build --network ic application && dfx canister --network ic install application --mode=reinstall",
+    "deploy:internet-identity": "sh ./scripts/download-did-and-wasm && dfx canister deploy internet-identity",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
   "devDependencies": {
-    "@dfinity/agent": "0.11.3",
-    "@dfinity/candid": "0.11.3",
-    "@dfinity/principal": "0.11.3",
+    "@dfinity/agent": "0.12.2",
+    "@dfinity/candid": "0.12.2",
+    "@dfinity/principal": "0.12.2",
     "@svgr/webpack": "^6.2.1",
     "@types/chai": "^4.3.1",
     "@types/mocha": "^9.1.1",
@@ -59,12 +60,16 @@
     "last 2 edge version"
   ],
   "dependencies": {
+    "@dfinity/auth-client": "^0.12.2",
+    "@dfinity/authentication": "^0.12.2",
+    "@dfinity/identity": "^0.12.2",
     "axios": "^0.27.2",
     "classnames": "^2.3.1",
     "memoizee": "^0.4.15",
     "rc-slider": "^10.0.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
+    "react-modal": "^3.15.1",
     "react-router-dom": "^6.3.0",
     "react-table": "^7.8.0",
     "react-toastify": "^9.0.4"

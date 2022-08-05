@@ -10,21 +10,16 @@ import VaultContext from './VaultContext';
 const VaultProvider = ({ children }) => {
   const [vaultActor, setVaultActor] = useState();
 
-  const { plug, principle } = useWallet();
+  const { createActor, principle } = useWallet();
 
   useEffect(() => {
     const initVaultActor = async () => {
-      const vaultActor = await plug.current.createActor({
-        canisterId: vaultCanisterId,
-        interfaceFactory: vaultIdl,
-      });
+      const vaultActor = await createActor(vaultIdl, vaultCanisterId);
 
       setVaultActor(vaultActor);
     };
 
-    if (principle && plug.current) {
-      initVaultActor();
-    }
+    initVaultActor();
   }, [principle]);
 
   const {
