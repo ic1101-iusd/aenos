@@ -132,6 +132,7 @@ const usePositions = ({ vaultActor, principle }) => {
     try {
       if (!principle) {
         setPositions([]);
+        setCurrentPosition(null);
         return;
       }
 
@@ -183,7 +184,9 @@ const usePositions = ({ vaultActor, principle }) => {
 
       logger.log({ res });
 
-      setCurrentPosition(null);
+      if (currentPosition?.id === id) {
+        setCurrentPosition(null);
+      }
 
       await updateBalances();
       await getAccountPositions();

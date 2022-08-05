@@ -23,8 +23,6 @@ class Plug {
 
     if (!connected) return;
 
-    logger.log('Plug: login success', connected);
-
     if (!plug.agent) {
       await plug.createAgent({
         whitelist,
@@ -32,7 +30,11 @@ class Plug {
       });
     }
 
-    return await plug.agent.getPrincipal();
+    const principal = await plug.agent.getPrincipal();
+
+    logger.log('Plug: login success', principal);
+
+    return principal;
   };
 
   disconnect() {
