@@ -6,7 +6,7 @@ import wallets from 'Services/wallet/wallets';
 
 const useConnect = () => {
   const [principle, setPrinciple] = useState(null);
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(true);
 
   const connect = useCallback(async (wallet) => {
     try {
