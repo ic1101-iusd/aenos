@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import ReactGA from 'react-ga';
 
 import Checkbox from 'Components/Checkbox';
 
@@ -6,6 +7,12 @@ import styles from './Filters.scss';
 
 const Filters = ({ filters, setFilters }) => {
   const handleChange = useCallback((ev) => {
+    ReactGA.event({
+      category: 'Stats',
+      action: 'Change filters',
+      value: ev.target.name,
+    });
+
     setFilters(current => ({
       ...current,
       [ev.target.name]: !current[ev.target.name],

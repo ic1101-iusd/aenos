@@ -14,4 +14,7 @@ export default {
   isDevelopment,
   HOST,
   SERVER_HOST: 'https://icp-liquidator.herokuapp.com',
+  GOOGLE_ANALYTICS_TRACKING_CODE: process.env.GOOGLE_ANALYTICS_TRACKING_CODE,
+  ROLLBAR_ACCESS_TOKEN: process.env.ROLLBAR_ACCESS_TOKEN,
+  env: process.env.NODE_ENV,
 };

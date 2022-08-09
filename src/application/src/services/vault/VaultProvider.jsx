@@ -22,6 +22,8 @@ const VaultProvider = ({ children }) => {
     initVaultActor();
   }, [principle]);
 
+  const { collateralPrice, collateralNextPrice } = useCollateralPrice({ vaultActor });
+
   const {
     createPosition,
     currentPosition,
@@ -32,9 +34,7 @@ const VaultProvider = ({ children }) => {
     selectPosition,
     getAllPositions,
     allPositions,
-  } = usePositions({ vaultActor, principle });
-
-  const { collateralPrice, collateralNextPrice } = useCollateralPrice({ vaultActor });
+  } = usePositions({ vaultActor, principle, collateralPrice });
 
   const value = useMemo(() => {
     return {

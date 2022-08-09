@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Modal from 'react-modal';
 import cn from 'classnames';
+import ReactGA from 'react-ga';
 
 import Button from 'Components/Button';
 import { useWallet } from 'Services/wallet';
@@ -31,6 +32,13 @@ const customStyles = {
   }
 };
 
+const onHeaderLinkClick = (ev) => {
+  ReactGA.event({
+    category: 'User',
+    action: `${ev.target.innerHTML} link clicked`,
+  });
+};
+
 const Connect = () => {
   const { connect, disconnect, isLoggedIn, principle } = useWallet();
   const { dropBtc } = useCoins();
@@ -57,7 +65,7 @@ const Connect = () => {
   return (
     <div className={styles.buttons}>
       <Link to={isHome ? '/stats' : '/'}>
-        <Button className={styles.drop}>
+        <Button className={styles.drop} onClick={onHeaderLinkClick}>
           {isHome ? 'Stats' : 'Home'}
         </Button>
       </Link>
