@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import ReactGA from 'react-ga';
 
 import config from 'Constants/config';
 import { useWallet } from 'Services/wallet';
@@ -57,7 +58,12 @@ const CoinsProvider = ({ children }) => {
           }
         );
 
-        logger.log('Dropped 1 BTC');
+        ReactGA.event({
+          category: 'User',
+          action: 'Dropped 1 FBTC',
+        });
+
+        logger.log('Dropped 1 FBTC');
       } catch (e) {
         logger.error(e);
       }

@@ -118,6 +118,7 @@ const PositionForm = ({
           placeholder="0.00"
           max={btc.balance}
           type="number"
+          onWheel={(e) => e.target.blur()}
         />
         <div className={styles.usdAmount}>
           ~{formatDollars(collateralPrice)}

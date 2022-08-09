@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Principal } from '@dfinity/principal';
 import { toast } from 'react-toastify';
+import ReactGA from 'react-ga';
 
 import { toBigInt, fromBigInt } from 'Utils/formatters';
 import { canisterId as vaultCanisterId } from 'Declarations/protocol';
@@ -29,7 +30,7 @@ const coinApprove = async (coin, amount, bigIntAmount) => {
   logger.log({ approve });
 };
 
-const usePositions = ({ vaultActor, principle }) => {
+const usePositions = ({ vaultActor, principle, collateralPrice }) => {
   const [allPositions, setAllPositions] = useState([]);
   const [positions, setPositions] = useState([]);
   const [currentPosition, setCurrentPosition] = useState(null);
@@ -72,6 +73,12 @@ const usePositions = ({ vaultActor, principle }) => {
       setPositions(current => [...current, position]);
 
       await updateBalances();
+
+      ReactGA.event({
+        category: 'Position',
+        action: 'Create',
+        value: collateralAmount * collateralPrice,
+      });
     } catch (e) {
       logger.error(e);
     }
@@ -123,10 +130,32 @@ const usePositions = ({ vaultActor, principle }) => {
       setPositions(current => current.map(p => position.id === p.id ? position : p));
 
       await updateBalances();
+
+      if (collateral > currentPosition.collateralAmount) {
+        ReactGA.event({
+          category: 'Position',
+          action: 'Deposit',
+          value: (collateral - currentPosition.collateralAmount) * collateralPrice,
+        });
+      }
+      if (collateral < currentPosition.collateralAmount) {
+        ReactGA.event({
+          category: 'Position',
+          action: 'Withdraw',
+          value: (currentPosition.collateralAmount - collateral) * collateralPrice,
+        });
+      }
+      if (diffStable !== 0) {
+        ReactGA.event({
+          category: 'Position',
+          action: 'Change debt',
+          value: diffStable,
+        });
+      }
     } catch (e) {
       logger.error(e);
     }
-  }, [currentPosition, vaultActor, btc, iUsd, updateBalances]);
+  }, [currentPosition, vaultActor, btc, iUsd, updateBalances, collateralPrice]);
 
   const getAccountPositions = useCallback(async () => {
     try {
@@ -190,6 +219,12 @@ const usePositions = ({ vaultActor, principle }) => {
 
       await updateBalances();
       await getAccountPositions();
+
+      ReactGA.event({
+        category: 'Position',
+        action: 'Close',
+        value: closingPosition.collateralAmount * collateralPrice,
+      });
     } catch (e) {
       logger.error(e);
     }

@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useState } from 'react';
+import ReactGA from 'react-ga';
 
 import logger from 'Utils/logger';
 import { SIGNED_WALLET_STORAGE_KEY, WALLETS } from 'Constants/common';
@@ -15,6 +16,12 @@ const useConnect = () => {
       if (p) {
         setPrinciple(p);
         localStorage.setItem(SIGNED_WALLET_STORAGE_KEY, wallet);
+
+        ReactGA.event({
+          category: 'User',
+          action: `Connect with ${wallet}`,
+          value: p.toString(),
+        });
       }
     } catch (err) {
       logger.error(err);
@@ -31,6 +38,11 @@ const useConnect = () => {
       wallets[wallet].disconnect();
 
       setPrinciple(null);
+
+      ReactGA.event({
+        category: 'User',
+        action: `Disconnect with ${wallet}`,
+      });
     } catch (err) {
       logger.error(err);
     }
@@ -60,6 +72,12 @@ const useConnect = () => {
 
         if (p) {
           setPrinciple(p);
+
+          ReactGA.event({
+            category: 'User',
+            action: `Auto-Connect with ${wallet}`,
+            value: p.toString(),
+          });
         } else {
           localStorage.removeItem(SIGNED_WALLET_STORAGE_KEY);
         }
