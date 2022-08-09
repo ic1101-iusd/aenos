@@ -75,6 +75,7 @@ module.exports = {
       Assets: path.resolve(__dirname, './src/application/assets/'),
       Declarations: path.resolve(__dirname, './src/declarations/'),
       Shared: path.resolve(__dirname, './src/application/src/shared/'),
+      Pages: path.resolve(__dirname, './src/application/src/pages/'),
     },
   },
   output: {
@@ -140,6 +141,7 @@ module.exports = {
       Buffer: [require.resolve("buffer/"), "Buffer"],
       process: require.resolve("process/browser"),
     }),
+    new Dotenv(),
   ],
   // proxy /api to port 8000 during development
   devServer: {
