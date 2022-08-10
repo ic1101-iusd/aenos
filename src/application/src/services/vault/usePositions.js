@@ -47,7 +47,10 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
       await coinApprove(btc, collateralAmount, bigIntCollateral);
 
       const res = await toast.promise(
-        vaultActor.createPosition(bigIntCollateral, bigIntStable),
+        async () => {
+          await vaultActor.createPosition(bigIntCollateral, bigIntStable);
+          await updateBalances();
+        },
         {
           pending: `Use ${collateralAmount} BTC as collateral to generate ${stableAmount} ${iUsd.symbol}`,
           success: `${stableAmount} ${iUsd.symbol} generated successfully`,
@@ -71,8 +74,6 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
 
       setCurrentPosition(position);
       setPositions(current => [...current, position]);
-
-      await updateBalances();
 
       ReactGA.event({
         category: 'Position',
@@ -104,7 +105,10 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
       }
 
       const res = await toast.promise(
-        vaultActor.updatePosition(id, bigIntCollateral, bigIntStable),
+        async () => {
+          await vaultActor.updatePosition(id, bigIntCollateral, bigIntStable);
+          await updateBalances();
+        },
         {
           pending: 'Updating position...',
           success: 'Position updated',
@@ -128,8 +132,6 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
 
       setCurrentPosition(position);
       setPositions(current => current.map(p => position.id === p.id ? position : p));
-
-      await updateBalances();
 
       if (collateral > currentPosition.collateralAmount) {
         ReactGA.event({
@@ -197,7 +199,11 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
       await coinApprove(iUsd, closingPosition.stableAmount, bigIntDebt);
 
       const res = await toast.promise(
-        vaultActor.closePosition(id),
+        async () => {
+          await vaultActor.closePosition(id);
+          await updateBalances();
+          await getAccountPositions();
+        },
         {
           pending: 'Closing position...',
           success: `Position closed, ${closingPosition.collateralAmount} ${btc.symbol} moved back to your wallet`,
@@ -216,9 +222,6 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
       if (currentPosition?.id === id) {
         setCurrentPosition(null);
       }
-
-      await updateBalances();
-      await getAccountPositions();
 
       ReactGA.event({
         category: 'Position',
