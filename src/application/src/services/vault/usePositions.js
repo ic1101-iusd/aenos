@@ -48,8 +48,10 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
 
       const res = await toast.promise(
         async () => {
-          await vaultActor.createPosition(bigIntCollateral, bigIntStable);
+          const res = await vaultActor.createPosition(bigIntCollateral, bigIntStable);
           await updateBalances();
+
+          return res;
         },
         {
           pending: `Use ${collateralAmount} BTC as collateral to generate ${stableAmount} ${iUsd.symbol}`,
@@ -106,8 +108,10 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
 
       const res = await toast.promise(
         async () => {
-          await vaultActor.updatePosition(id, bigIntCollateral, bigIntStable);
+          const res = await vaultActor.updatePosition(id, bigIntCollateral, bigIntStable);
           await updateBalances();
+
+          return res;
         },
         {
           pending: 'Updating position...',
@@ -200,9 +204,11 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
 
       const res = await toast.promise(
         async () => {
-          await vaultActor.closePosition(id);
+          const res = await vaultActor.closePosition(id);
           await updateBalances();
           await getAccountPositions();
+
+          return res;
         },
         {
           pending: 'Closing position...',
