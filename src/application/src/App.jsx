@@ -6,6 +6,7 @@ import Header from 'Components/Header';
 import Footer from 'Components/Footer';
 import Stats from 'Pages/Stats';
 import Main from 'Pages/Main';
+import ErrorPage from 'Pages/ErrorPage';
 import { useWallet } from 'Services/wallet';
 import config from 'Constants/config';
 
@@ -41,6 +42,11 @@ const App = () => {
         <Route
           path="/stats"
           element={<Stats />}
+        />
+
+        <Route
+          path="*"
+          element={<ErrorPage code={404} />}
         />
       </Routes>
 

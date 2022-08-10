@@ -3,14 +3,19 @@ import ReactGA from 'react-ga';
 
 import styles from './ErrorPage.scss';
 
-const ErrorPage = () => {
+const errors = {
+  404: 'Page not found',
+  any: 'Something went wrong',
+};
+
+const ErrorPage = ({ code }) => {
   useEffect(() => {
     ReactGA.pageview('/error-page');
   }, []);
 
   return (
     <div className={styles.errorPage}>
-      <div className={styles.errorLabel}>Something went wrong</div>
+      <div className={styles.errorLabel}>{errors[code] ?? errors.any}</div>
     </div>
   );
 };
