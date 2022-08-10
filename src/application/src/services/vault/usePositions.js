@@ -3,7 +3,7 @@ import { Principal } from '@dfinity/principal';
 import { toast } from 'react-toastify';
 import ReactGA from 'react-ga';
 
-import { toBigInt, fromBigInt } from 'Utils/formatters';
+import { toBigInt, fromBigInt, formatCoins } from 'Utils/formatters';
 import { canisterId as vaultCanisterId } from 'Declarations/protocol';
 import { useCoins } from 'Services/coins';
 import logger from 'Utils/logger';
@@ -15,7 +15,7 @@ const coinApprove = async (coin, amount, bigIntAmount) => {
       bigIntAmount
     ),
     {
-      pending: `Approving ${amount} ${coin.symbol}`,
+      pending: `Approving ${formatCoins(amount)} ${coin.symbol}`,
       success: `Approved successfully`,
       error: {
         render({ error }) {
@@ -54,8 +54,8 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
           return res;
         },
         {
-          pending: `Use ${collateralAmount} BTC as collateral to generate ${stableAmount} ${iUsd.symbol}`,
-          success: `${stableAmount} ${iUsd.symbol} generated successfully`,
+          pending: `Use ${formatCoins(collateralAmount)} BTC as collateral to generate ${formatCoins(stableAmount)} ${iUsd.symbol}`,
+          success: `${formatCoins(stableAmount)} ${iUsd.symbol} generated successfully`,
           error: {
             render({ error }) {
               logger.error('CreatePosition', error);
@@ -212,7 +212,7 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
         },
         {
           pending: 'Closing position...',
-          success: `Position closed, ${closingPosition.collateralAmount} ${btc.symbol} moved back to your wallet`,
+          success: `Position closed, ${formatCoins(closingPosition.collateralAmount)} ${btc.symbol} moved back to your wallet`,
           error: {
             render({ error }) {
               logger.error('ClosePosition', error);
