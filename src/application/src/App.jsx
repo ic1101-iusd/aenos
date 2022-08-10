@@ -4,8 +4,9 @@ import ReactGA from 'react-ga';
 
 import Header from 'Components/Header';
 import Footer from 'Components/Footer';
-import Stats from 'Containers/Stats';
-import Main from 'Containers/Main';
+import Stats from 'Pages/Stats';
+import Main from 'Pages/Main';
+import ErrorPage from 'Pages/ErrorPage';
 import { useWallet } from 'Services/wallet';
 import config from 'Constants/config';
 
@@ -18,7 +19,7 @@ const App = () => {
   useEffect(() => {
     if (!isConnecting) {
       ReactGA.initialize(config.GOOGLE_ANALYTICS_TRACKING_CODE, {
-        debug: true,
+        debug: config.isDevelopment,
         gaOptions: {
           userId: principle ? principle.toString() : 'anon',
         },
@@ -41,6 +42,11 @@ const App = () => {
         <Route
           path="/stats"
           element={<Stats />}
+        />
+
+        <Route
+          path="*"
+          element={<ErrorPage code={404} />}
         />
       </Routes>
 

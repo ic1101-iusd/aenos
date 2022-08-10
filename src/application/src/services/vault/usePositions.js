@@ -177,7 +177,7 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
 
       setPositions(positions);
 
-      // TODO: Temporary setting currentPosition on init
+      // setting first valid position as current
       if (!currentPosition) {
         setCurrentPosition(positions.filter(position => !(position.deleted || position.liquidated))?.[0] ?? null);
       }

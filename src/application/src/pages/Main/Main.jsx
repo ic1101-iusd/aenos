@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 
-import CoinBalances from 'Containers/CoinBalances';
-import Position from 'Containers/Position';
 import PositionsTable from 'Containers/PositionsTable';
-import { useVault } from 'Services/vault';
 import getColumns from 'Containers/PositionsTable/getColumns';
+import { useVault } from 'Services/vault';
+
+import Position from './Position';
+import CoinBalances from './CoinBalances';
 
 const Main = () => {
   const { positions, selectPosition, closePosition } = useVault();
