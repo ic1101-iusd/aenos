@@ -3,7 +3,7 @@ import { Principal } from '@dfinity/principal';
 import { toast } from 'react-toastify';
 import ReactGA from 'react-ga';
 
-import { toBigInt, fromBigInt } from 'Utils/formatters';
+import { toBigInt, fromBigInt, formatCoins } from 'Utils/formatters';
 import { canisterId as vaultCanisterId } from 'Declarations/protocol';
 import { useCoins } from 'Services/coins';
 import logger from 'Utils/logger';
@@ -15,7 +15,7 @@ const coinApprove = async (coin, amount, bigIntAmount) => {
       bigIntAmount
     ),
     {
-      pending: `Approving ${amount} ${coin.symbol}`,
+      pending: `Approving ${formatCoins(amount)} ${coin.symbol}`,
       success: `Approved successfully`,
       error: {
         render({ error }) {
@@ -47,10 +47,15 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
       await coinApprove(btc, collateralAmount, bigIntCollateral);
 
       const res = await toast.promise(
-        vaultActor.createPosition(bigIntCollateral, bigIntStable),
+        async () => {
+          const res = await vaultActor.createPosition(bigIntCollateral, bigIntStable);
+          await updateBalances();
+
+          return res;
+        },
         {
-          pending: `Use ${collateralAmount} BTC as collateral to generate ${stableAmount} ${iUsd.symbol}`,
-          success: `${stableAmount} ${iUsd.symbol} generated successfully`,
+          pending: `Use ${formatCoins(collateralAmount)} BTC as collateral to generate ${formatCoins(stableAmount)} ${iUsd.symbol}`,
+          success: `${formatCoins(stableAmount)} ${iUsd.symbol} generated successfully`,
           error: {
             render({ error }) {
               logger.error('CreatePosition', error);
@@ -71,8 +76,6 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
 
       setCurrentPosition(position);
       setPositions(current => [...current, position]);
-
-      await updateBalances();
 
       ReactGA.event({
         category: 'Position',
@@ -104,7 +107,12 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
       }
 
       const res = await toast.promise(
-        vaultActor.updatePosition(id, bigIntCollateral, bigIntStable),
+        async () => {
+          const res = await vaultActor.updatePosition(id, bigIntCollateral, bigIntStable);
+          await updateBalances();
+
+          return res;
+        },
         {
           pending: 'Updating position...',
           success: 'Position updated',
@@ -128,8 +136,6 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
 
       setCurrentPosition(position);
       setPositions(current => current.map(p => position.id === p.id ? position : p));
-
-      await updateBalances();
 
       if (collateral > currentPosition.collateralAmount) {
         ReactGA.event({
@@ -197,10 +203,16 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
       await coinApprove(iUsd, closingPosition.stableAmount, bigIntDebt);
 
       const res = await toast.promise(
-        vaultActor.closePosition(id),
+        async () => {
+          const res = await vaultActor.closePosition(id);
+          await updateBalances();
+          await getAccountPositions();
+
+          return res;
+        },
         {
           pending: 'Closing position...',
-          success: `Position closed, ${closingPosition.collateralAmount} ${btc.symbol} moved back to your wallet`,
+          success: `Position closed, ${formatCoins(closingPosition.collateralAmount)} ${btc.symbol} moved back to your wallet`,
           error: {
             render({ error }) {
               logger.error('ClosePosition', error);
@@ -216,9 +228,6 @@ const usePositions = ({ vaultActor, principle, collateralPrice }) => {
       if (currentPosition?.id === id) {
         setCurrentPosition(null);
       }
-
-      await updateBalances();
-      await getAccountPositions();
 
       ReactGA.event({
         category: 'Position',
